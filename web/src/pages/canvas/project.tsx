@@ -2901,7 +2901,7 @@ function InfiniteCanvasPage({ embedded, hostManagedGeneration, onGenerateNode }:
                             onToggleBatch={toggleBatchExpanded}
                             onSetBatchPrimary={setBatchPrimary}
                             onRetry={handleNodeRetry}
-                            onGenerateImage={generateImageFromTextNode}
+                            onGenerateImage={hostManagedGeneration ? undefined : generateImageFromTextNode}
                             onViewImage={handleNodeViewImage}
                             onContextMenu={handleNodeContextMenu}
                         />
@@ -2944,7 +2944,7 @@ function InfiniteCanvasPage({ embedded, hostManagedGeneration, onGenerateNode }:
                     onDecreaseFont={(node) => handleFontSizeChange(node.id, Math.max(10, (node.metadata?.fontSize || 14) - 2))}
                     onIncreaseFont={(node) => handleFontSizeChange(node.id, Math.min(32, (node.metadata?.fontSize || 14) + 2))}
                     onToggleDialog={(node) => setDialogNodeId((current) => (current === node.id ? null : node.id))}
-                    onGenerateImage={generateImageFromTextNode}
+                    onGenerateImage={hostManagedGeneration ? undefined : generateImageFromTextNode}
                     onUpload={(node) => handleUploadRequest(node.id)}
                     onDownload={downloadNodeImage}
                     onSaveAsset={(node) => void saveNodeAsset(node)}
