@@ -52,12 +52,17 @@ function EmbeddedCanvas({ project, theme = "light", className, style, onProjectC
     const [canvasRevision, setCanvasRevision] = useState("");
     const lastHostVersionRef = useRef("");
     const lastEmittedVersionRef = useRef("");
+    const onProjectChangeRef = useRef(onProjectChange);
     const normalizedProject = useMemo(() => normalizeProject(project), [project]);
     const hostVersion = normalizedProject.updatedAt;
 
     useLayoutEffect(() => {
         useThemeStore.getState().setTheme(theme);
     }, [theme]);
+
+    useLayoutEffect(() => {
+        onProjectChangeRef.current = onProjectChange;
+    }, [onProjectChange]);
 
     useEffect(() => {
         if (!hydrated) return;
@@ -80,9 +85,10 @@ function EmbeddedCanvas({ project, theme = "light", className, style, onProjectC
 
     useEffect(() => {
         if (!ready || !currentProject || currentProject.updatedAt === lastEmittedVersionRef.current) return;
+        if (lastHostVersionRef.current && currentProject.updatedAt < lastHostVersionRef.current) return;
         lastEmittedVersionRef.current = currentProject.updatedAt;
-        onProjectChange?.(currentProject);
-    }, [currentProject, onProjectChange, ready]);
+        onProjectChangeRef.current?.(currentProject);
+    }, [currentProject, ready]);
 
     const dark = theme === "dark";
     const rootClassName = ["inexgrow-canvas-root", dark ? "dark" : "", className || ""].filter(Boolean).join(" ");
