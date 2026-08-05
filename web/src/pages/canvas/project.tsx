@@ -133,9 +133,15 @@ const IMAGE_PROMPT_REVERSE_PRESET = `请根据参考图片反推一段适合用�
 
 export type CanvasPageProps = {
     embedded?: boolean;
+    onGenerateNode?: (request: {
+        nodeId: string;
+        mode: CanvasNodeGenerationMode;
+        prompt: string;
+        node: CanvasNodeData;
+    }) => void | Promise<void>;
 };
 
-export default function CanvasPage({ embedded = false }: CanvasPageProps) {
+export default function CanvasPage({ embedded = false, onGenerateNode }: CanvasPageProps) {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -144,10 +150,10 @@ export default function CanvasPage({ embedded = false }: CanvasPageProps) {
 
     if (!mounted) return <CanvasRefreshShell />;
 
-    return <InfiniteCanvasPage embedded={embedded} />;
+    return <InfiniteCanvasPage embedded={embedded} onGenerateNode={onGenerateNode} />;
 }
 
-function InfiniteCanvasPage({ embedded }: { embedded: boolean }) {
+function InfiniteCanvasPage({ embedded, onGenerateNode }: Required<Pick<CanvasPageProps, "embedded">> & Pick<CanvasPageProps, "onGenerateNode">) {
     const { message, modal } = App.useApp();
     // 订阅节点注册表版本,插件动态注册/卸载后驱动画布重渲染
     const nodeRegistryVersion = useNodeRegistryVersion((state) => state.version);
@@ -2038,6 +2044,39 @@ function InfiniteCanvasPage({ embedded }: { embedded: boolean }) {
     const handleGenerateNode = useCallback(
         async (nodeId: string, mode: CanvasNodeGenerationMode, prompt: string) => {
             const sourceNode = nodesRef.current.find((node) => node.id === nodeId);
+            if (onGenerateNode && sourceNode) {
+                setRunningNodeId(nodeId);
+                setNodes((prev) =>
+                    prev.map((node) =>
+                        node.id === nodeId
+                            ? { ...node, metadata: { ...node.metadata, prompt, status: NODE_STATUS_LOADING, errorDetails: undefined } }
+                            : node,
+                    ),
+                );
+                try {
+                    await onGenerateNode({ nodeId, mode, prompt, node: sourceNode });
+                    setNodes((prev) =>
+                        prev.map((node) =>
+                            node.id === nodeId
+                                ? { ...node, metadata: { ...node.metadata, prompt, status: NODE_STATUS_SUCCESS, errorDetails: undefined } }
+                                : node,
+                        ),
+                    );
+                } catch (error) {
+                    const errorDetails = error instanceof Error ? error.message : "生成失败";
+                    message.error(errorDetails);
+                    setNodes((prev) =>
+                        prev.map((node) =>
+                            node.id === nodeId
+                                ? { ...node, metadata: { ...node.metadata, status: NODE_STATUS_ERROR, errorDetails } }
+                                : node,
+                        ),
+                    );
+                } finally {
+                    setRunningNodeId(null);
+                }
+                return;
+            }
             const generationConfig = buildGenerationConfig(effectiveConfig, sourceNode, mode);
             if (!isAiConfigReady(generationConfig, generationConfig.model)) {
                 openConfigDialog(true);
@@ -2452,7 +2491,7 @@ function InfiniteCanvasPage({ embedded }: { embedded: boolean }) {
                 setRunningNodeId(null);
             }
         },
-        [effectiveConfig, finishGenerationRequest, isAiConfigReady, message, openConfigDialog, startGenerationRequest],
+        [effectiveConfig, finishGenerationRequest, isAiConfigReady, message, onGenerateNode, openConfigDialog, startGenerationRequest],
     );
     useEffect(() => {
         generateNodeRef.current = handleGenerateNode;

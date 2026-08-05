@@ -84,6 +84,14 @@ export type InexgrowCanvasProps = {
     className?: string;
     style?: CSSProperties;
     onProjectChange?: (project: CanvasProject) => void;
+    onGenerateNode?: (request: InexgrowCanvasGenerateNodeRequest) => void | Promise<void>;
+};
+
+export type InexgrowCanvasGenerateNodeRequest = {
+    nodeId: string;
+    mode: "text" | "image" | "video" | "audio";
+    prompt: string;
+    node: CanvasNodeData;
 };
 
 export declare function InexgrowCanvas(props: InexgrowCanvasProps): ReactElement;

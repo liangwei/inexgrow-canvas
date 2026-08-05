@@ -20,6 +20,14 @@ export type InexgrowCanvasProps = {
     className?: string;
     style?: CSSProperties;
     onProjectChange?: (project: CanvasProject) => void;
+    onGenerateNode?: (request: InexgrowCanvasGenerateNodeRequest) => void | Promise<void>;
+};
+
+export type InexgrowCanvasGenerateNodeRequest = {
+    nodeId: string;
+    mode: "text" | "image" | "video" | "audio";
+    prompt: string;
+    node: CanvasNodeData;
 };
 
 const queryClient = new QueryClient({
@@ -36,7 +44,7 @@ export function InexgrowCanvas(props: InexgrowCanvasProps) {
     return <EmbeddedCanvas key={props.project.id} {...props} />;
 }
 
-function EmbeddedCanvas({ project, theme = "light", className, style, onProjectChange }: InexgrowCanvasProps) {
+function EmbeddedCanvas({ project, theme = "light", className, style, onProjectChange, onGenerateNode }: InexgrowCanvasProps) {
     const rootRef = useRef<HTMLDivElement>(null);
     const hydrated = useCanvasStore((state) => state.hydrated);
     const currentProject = useCanvasStore((state) => state.projects.find((item) => item.id === project.id));
@@ -79,7 +87,7 @@ function EmbeddedCanvas({ project, theme = "light", className, style, onProjectC
                         {ready ? (
                             <MemoryRouter initialEntries={[`/canvas/${encodeURIComponent(project.id)}`]}>
                                 <Routes>
-                                    <Route path="/canvas/:id" element={<CanvasPage embedded />} />
+                                    <Route path="/canvas/:id" element={<CanvasPage embedded onGenerateNode={onGenerateNode} />} />
                                 </Routes>
                             </MemoryRouter>
                         ) : (
