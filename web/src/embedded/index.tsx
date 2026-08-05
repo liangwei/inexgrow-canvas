@@ -49,6 +49,7 @@ function EmbeddedCanvas({ project, theme = "light", className, style, onProjectC
     const hydrated = useCanvasStore((state) => state.hydrated);
     const currentProject = useCanvasStore((state) => state.projects.find((item) => item.id === project.id));
     const [ready, setReady] = useState(false);
+    const [canvasRevision, setCanvasRevision] = useState("");
     const lastHostVersionRef = useRef("");
     const lastEmittedVersionRef = useRef("");
     const normalizedProject = useMemo(() => normalizeProject(project), [project]);
@@ -72,6 +73,7 @@ function EmbeddedCanvas({ project, theme = "light", className, style, onProjectC
         const existing = store.projects.find((item) => item.id === normalizedProject.id);
         if (!existing || existing.updatedAt !== hostVersion) {
             store.replaceProjects([normalizedProject, ...store.projects.filter((item) => item.id !== normalizedProject.id)]);
+            setCanvasRevision(hostVersion);
         }
         setReady(true);
     }, [hostVersion, hydrated, normalizedProject]);
@@ -93,7 +95,7 @@ function EmbeddedCanvas({ project, theme = "light", className, style, onProjectC
                         {ready ? (
                             <MemoryRouter initialEntries={[`/canvas/${encodeURIComponent(project.id)}`]}>
                                 <Routes>
-                                    <Route path="/canvas/:id" element={<CanvasPage embedded onGenerateNode={onGenerateNode} />} />
+                                    <Route path="/canvas/:id" element={<CanvasPage key={canvasRevision || hostVersion} embedded onGenerateNode={onGenerateNode} />} />
                                 </Routes>
                             </MemoryRouter>
                         ) : (
