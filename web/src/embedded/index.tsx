@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { App, ConfigProvider } from "antd";
@@ -54,19 +54,25 @@ function EmbeddedCanvas({ project, theme = "light", className, style, onProjectC
     const normalizedProject = useMemo(() => normalizeProject(project), [project]);
     const hostVersion = normalizedProject.updatedAt;
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         useThemeStore.getState().setTheme(theme);
     }, [theme]);
 
     useEffect(() => {
         if (!hydrated) return;
-        const store = useCanvasStore.getState();
-        const existing = store.projects.find((item) => item.id === normalizedProject.id);
-        if (!existing || (hostVersion !== lastHostVersionRef.current && existing.updatedAt !== hostVersion)) {
-            store.replaceProjects([normalizedProject, ...store.projects.filter((item) => item.id !== normalizedProject.id)]);
+        if (hostVersion === lastHostVersionRef.current) {
+            setReady(true);
+            return;
         }
+        // Mark the host revision before notifying Zustand subscribers. React 19
+        // can synchronously re-enter this effect while replaceProjects emits.
         lastHostVersionRef.current = hostVersion;
         lastEmittedVersionRef.current = hostVersion;
+        const store = useCanvasStore.getState();
+        const existing = store.projects.find((item) => item.id === normalizedProject.id);
+        if (!existing || existing.updatedAt !== hostVersion) {
+            store.replaceProjects([normalizedProject, ...store.projects.filter((item) => item.id !== normalizedProject.id)]);
+        }
         setReady(true);
     }, [hostVersion, hydrated, normalizedProject]);
 
