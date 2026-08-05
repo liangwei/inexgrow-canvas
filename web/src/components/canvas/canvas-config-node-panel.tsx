@@ -35,7 +35,7 @@ export function CanvasConfigNodePanel({ node, isRunning, hostManagedGeneration =
     const canGenerate = hasComposerContent || (mode === "audio" ? inputSummary.textCount > 0 : hasAnyInput);
 
     return (
-        <div className="flex h-full w-full cursor-move flex-col px-3 pb-3 pt-7 text-sm" style={{ color: theme.node.text }} onWheel={(event) => event.stopPropagation()}>
+        <div className={`flex h-full w-full cursor-move flex-col px-3 pb-3 pt-7 text-sm${hostManagedGeneration ? " canvas-director-config-node" : ""}`} style={{ color: theme.node.text }} onWheel={(event) => event.stopPropagation()}>
             <div className="mb-2 flex items-center justify-between gap-3">
                 <div className="shrink-0 text-sm font-semibold">{hostManagedGeneration ? "分镜生成" : "生成配置"}</div>
                 {hostManagedGeneration ? (
@@ -146,7 +146,7 @@ export function CanvasConfigNodePanel({ node, isRunning, hostManagedGeneration =
 
             <Button
                 type="primary"
-                className="mt-auto !h-9 !w-full !cursor-pointer !rounded-lg"
+                className={`mt-auto !h-9 !w-full !cursor-pointer !rounded-lg${hostManagedGeneration ? " canvas-director-generate-button" : ""}`}
                 danger={isRunning}
                 disabled={!isRunning && !canGenerate}
                 onMouseDown={(event) => event.stopPropagation()}

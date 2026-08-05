@@ -53,6 +53,7 @@ function EmbeddedCanvas({ project, theme = "light", hostManagedGeneration = fals
     const [canvasRevision, setCanvasRevision] = useState("");
     const lastHostVersionRef = useRef("");
     const lastEmittedVersionRef = useRef("");
+    const projectChangeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const onProjectChangeRef = useRef(onProjectChange);
     const normalizedProject = useMemo(() => normalizeProject(project), [project]);
     const hostVersion = normalizedProject.updatedAt;
@@ -74,6 +75,10 @@ function EmbeddedCanvas({ project, theme = "light", hostManagedGeneration = fals
         }
         // Mark the host revision before notifying Zustand subscribers. React 19
         // can synchronously re-enter this effect while replaceProjects emits.
+        if (projectChangeTimerRef.current) {
+            clearTimeout(projectChangeTimerRef.current);
+            projectChangeTimerRef.current = null;
+        }
         lastHostVersionRef.current = hostVersion;
         lastEmittedVersionRef.current = hostVersion;
         if (!existing || existing.updatedAt !== hostVersion) {
@@ -86,8 +91,23 @@ function EmbeddedCanvas({ project, theme = "light", hostManagedGeneration = fals
     useEffect(() => {
         if (!ready || !currentProject || currentProject.updatedAt === lastEmittedVersionRef.current) return;
         if (lastHostVersionRef.current && currentProject.updatedAt < lastHostVersionRef.current) return;
-        lastEmittedVersionRef.current = currentProject.updatedAt;
-        onProjectChangeRef.current?.(currentProject);
+
+        if (projectChangeTimerRef.current) {
+            clearTimeout(projectChangeTimerRef.current);
+        }
+        projectChangeTimerRef.current = setTimeout(() => {
+            projectChangeTimerRef.current = null;
+            if (currentProject.updatedAt === lastEmittedVersionRef.current) return;
+            if (lastHostVersionRef.current && currentProject.updatedAt < lastHostVersionRef.current) return;
+            lastEmittedVersionRef.current = currentProject.updatedAt;
+            onProjectChangeRef.current?.(currentProject);
+        }, 350);
+
+        return () => {
+            if (!projectChangeTimerRef.current) return;
+            clearTimeout(projectChangeTimerRef.current);
+            projectChangeTimerRef.current = null;
+        };
     }, [currentProject, ready]);
 
     const dark = theme === "dark";

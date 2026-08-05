@@ -17540,7 +17540,7 @@ function c4({ buttonRect: e, panelRef: t, placement: n, theme: r, config: o, onC
 }
 function u4({ node: e, isRunning: t, hostManagedGeneration: n = !1, inputSummary: r, onConfigChange: o, onGenerate: i, onStop: a, onComposerToggle: s }) {
   const l = fp(), u = Xo((g) => g.openConfigDialog), c = it[tt((g) => g.theme)], f = n ? "video" : e.metadata?.generationMode || "image", h = d4(l, e, f), p = { background: c.node.fill, borderColor: c.node.stroke, color: c.node.text }, b = !!(r.textCount || r.imageCount || r.videoCount || r.audioCount), v = !!(e.metadata?.composerContent ?? e.metadata?.prompt ?? "").trim() || (f === "audio" ? r.textCount > 0 : b);
-  return /* @__PURE__ */ T("div", { className: "flex h-full w-full cursor-move flex-col px-3 pb-3 pt-7 text-sm", style: { color: c.node.text }, onWheel: (g) => g.stopPropagation(), children: [
+  return /* @__PURE__ */ T("div", { className: `flex h-full w-full cursor-move flex-col px-3 pb-3 pt-7 text-sm${n ? " canvas-director-config-node" : ""}`, style: { color: c.node.text }, onWheel: (g) => g.stopPropagation(), children: [
     /* @__PURE__ */ T("div", { className: "mb-2 flex items-center justify-between gap-3", children: [
       /* @__PURE__ */ d("div", { className: "shrink-0 text-sm font-semibold", children: n ? "分镜生成" : "生成配置" }),
       n ? /* @__PURE__ */ T("div", { className: "inline-flex h-7 items-center gap-1 rounded-md border px-2 text-xs", style: p, children: [
@@ -17637,7 +17637,7 @@ function u4({ node: e, isRunning: t, hostManagedGeneration: n = !1, inputSummary
       $e,
       {
         type: "primary",
-        className: "mt-auto !h-9 !w-full !cursor-pointer !rounded-lg",
+        className: `mt-auto !h-9 !w-full !cursor-pointer !rounded-lg${n ? " canvas-director-generate-button" : ""}`,
         danger: t,
         disabled: !t && !v,
         onMouseDown: (g) => g.stopPropagation(),
@@ -31433,23 +31433,28 @@ function CU(e) {
   return /* @__PURE__ */ d(Gj, { ...e }, e.project.id);
 }
 function Gj({ project: e, theme: t = "light", hostManagedGeneration: n = !1, className: r, style: o, onProjectChange: i, onGenerateNode: a }) {
-  const s = he(null), l = xn((w) => w.hydrated), u = xn((w) => w.projects.find((k) => k.id === e.id)), [c, f] = Z(!1), [h, p] = Z(""), b = he(""), y = he(""), v = he(i), g = Be(() => Yj(e), [e]), x = g.updatedAt;
+  const s = he(null), l = xn((k) => k.hydrated), u = xn((k) => k.projects.find((M) => M.id === e.id)), [c, f] = Z(!1), [h, p] = Z(""), b = he(""), y = he(""), v = he(null), g = he(i), x = Be(() => Yj(e), [e]), C = x.updatedAt;
   ni(() => {
     tt.getState().setTheme(t);
   }, [t]), ni(() => {
-    v.current = i;
+    g.current = i;
   }, [i]), be(() => {
-    const w = xn.getState(), k = w.projects.find((M) => M.id === g.id);
-    if (x === b.current && k?.updatedAt === x) {
+    const k = xn.getState(), M = k.projects.find((A) => A.id === x.id);
+    if (C === b.current && M?.updatedAt === C) {
       f(!0);
       return;
     }
-    b.current = x, y.current = x, (!k || k.updatedAt !== x) && (w.replaceProjects([g, ...w.projects.filter((M) => M.id !== g.id)]), p(x)), f(!0);
-  }, [x, l, g]), be(() => {
-    !c || !u || u.updatedAt === y.current || b.current && u.updatedAt < b.current || (y.current = u.updatedAt, v.current?.(u));
+    v.current && (clearTimeout(v.current), v.current = null), b.current = C, y.current = C, (!M || M.updatedAt !== C) && (k.replaceProjects([x, ...k.projects.filter((A) => A.id !== x.id)]), p(C)), f(!0);
+  }, [C, l, x]), be(() => {
+    if (!(!c || !u || u.updatedAt === y.current) && !(b.current && u.updatedAt < b.current))
+      return v.current && clearTimeout(v.current), v.current = setTimeout(() => {
+        v.current = null, u.updatedAt !== y.current && (b.current && u.updatedAt < b.current || (y.current = u.updatedAt, g.current?.(u)));
+      }, 350), () => {
+        v.current && (clearTimeout(v.current), v.current = null);
+      };
   }, [u, c]);
-  const C = t === "dark", S = ["inexgrow-canvas-root", C ? "dark" : "", r || ""].filter(Boolean).join(" ");
-  return /* @__PURE__ */ d("div", { ref: s, className: S, "data-inexgrow-canvas-theme": t, style: o, children: /* @__PURE__ */ d(ow, { locale: oE, theme: qj(C), getPopupContainer: () => s.current || document.body, children: /* @__PURE__ */ d(Nr, { className: "inexgrow-canvas-app", children: /* @__PURE__ */ d(OE, { client: Kj, children: c ? /* @__PURE__ */ d(qN, { initialEntries: [`/canvas/${encodeURIComponent(e.id)}`], children: /* @__PURE__ */ d(GN, { children: /* @__PURE__ */ d($w, { path: "/canvas/:id", element: /* @__PURE__ */ d(Hj, { embedded: !0, hostManagedGeneration: n, onGenerateNode: a }, h || x) }) }) }) : /* @__PURE__ */ d("div", { className: "inexgrow-canvas-loading", children: "正在加载画布…" }) }) }) }) });
+  const S = t === "dark", w = ["inexgrow-canvas-root", S ? "dark" : "", r || ""].filter(Boolean).join(" ");
+  return /* @__PURE__ */ d("div", { ref: s, className: w, "data-inexgrow-canvas-theme": t, style: o, children: /* @__PURE__ */ d(ow, { locale: oE, theme: qj(S), getPopupContainer: () => s.current || document.body, children: /* @__PURE__ */ d(Nr, { className: "inexgrow-canvas-app", children: /* @__PURE__ */ d(OE, { client: Kj, children: c ? /* @__PURE__ */ d(qN, { initialEntries: [`/canvas/${encodeURIComponent(e.id)}`], children: /* @__PURE__ */ d(GN, { children: /* @__PURE__ */ d($w, { path: "/canvas/:id", element: /* @__PURE__ */ d(Hj, { embedded: !0, hostManagedGeneration: n, onGenerateNode: a }, h || C) }) }) }) : /* @__PURE__ */ d("div", { className: "inexgrow-canvas-loading", children: "正在加载画布…" }) }) }) }) });
 }
 function Yj(e) {
   const t = (/* @__PURE__ */ new Date()).toISOString();
