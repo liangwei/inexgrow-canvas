@@ -35,7 +35,7 @@ export default defineConfig({
         outDir: resolve(repositoryRoot, "dist"),
         emptyOutDir: true,
         cssCodeSplit: false,
-        sourcemap: true,
+        sourcemap: false,
         lib: {
             entry: resolve(webDir, "src/embedded/index.tsx"),
             formats: ["es"],
