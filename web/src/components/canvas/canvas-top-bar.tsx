@@ -9,6 +9,7 @@ import { useThemeStore } from "@/stores/use-theme-store";
 import { DOCS_URL } from "@/constant/env";
 
 export function CanvasTopBar({
+    embedded = false,
     title,
     titleDraft,
     isTitleEditing,
@@ -31,6 +32,7 @@ export function CanvasTopBar({
     compactAgentStatus,
     onToggleAgent,
 }: {
+    embedded?: boolean;
     title: string;
     titleDraft: string;
     isTitleEditing: boolean;
@@ -88,13 +90,17 @@ export function CanvasTopBar({
                         trigger={["click"]}
                         menu={{
                             items: [
-                                { key: "home", icon: <Home className="size-4" />, label: "主页", onClick: onHome },
-                                { key: "docs", icon: <BookOpen className="size-4" />, label: "文档", onClick: () => window.open(DOCS_URL, "_blank", "noopener,noreferrer") },
-                                { key: "projects", icon: <Images className="size-4" />, label: "我的画布", onClick: onProjects },
-                                { type: "divider" },
-                                { key: "new", icon: <Plus className="size-4" />, label: "新建画布", onClick: onCreateProject },
-                                { key: "delete", danger: true, icon: <Trash2 className="size-4" />, label: "删除当前画布", onClick: onDeleteProject },
-                                { type: "divider" },
+                                ...(!embedded
+                                    ? [
+                                          { key: "home", icon: <Home className="size-4" />, label: "主页", onClick: onHome },
+                                          { key: "docs", icon: <BookOpen className="size-4" />, label: "文档", onClick: () => window.open(DOCS_URL, "_blank", "noopener,noreferrer") },
+                                          { key: "projects", icon: <Images className="size-4" />, label: "我的画布", onClick: onProjects },
+                                          { type: "divider" as const },
+                                          { key: "new", icon: <Plus className="size-4" />, label: "新建画布", onClick: onCreateProject },
+                                          { key: "delete", danger: true, icon: <Trash2 className="size-4" />, label: "删除当前画布", onClick: onDeleteProject },
+                                          { type: "divider" as const },
+                                      ]
+                                    : []),
                                 { key: "import", icon: <Upload className="size-4" />, label: "导入资产", onClick: onImportImage },
                                 { key: "export", icon: <Download className="size-4" />, label: "导出当前画布", onClick: onExportProject },
                                 { type: "divider" },
@@ -133,10 +139,10 @@ export function CanvasTopBar({
                             </button>
                         )}
                     </div>
-                    <CompactAgentStatus status={compactAgentStatus} onClick={onToggleAgent} />
+                    {!embedded ? <CompactAgentStatus status={compactAgentStatus} onClick={onToggleAgent} /> : null}
                 </div>
 
-                <div className="pointer-events-auto flex items-center gap-1.5">
+                {!embedded ? <div className="pointer-events-auto flex items-center gap-1.5">
                     <UserStatusActions variant="canvas" onOpenShortcuts={() => setShortcutsOpen(true)} onOpenPlugins={onOpenPlugins} />
                     <span className="h-6 w-px" style={{ background: theme.toolbar.border }} />
                     <Button
@@ -148,7 +154,7 @@ export function CanvasTopBar({
                     >
                         Agent
                     </Button>
-                </div>
+                </div> : null}
             </div>
             <Modal title="快捷键" open={shortcutsOpen} onCancel={() => setShortcutsOpen(false)} footer={null} centered>
                 <div className="space-y-2 border-t pt-4 text-sm" style={{ borderColor: theme.node.stroke }}>

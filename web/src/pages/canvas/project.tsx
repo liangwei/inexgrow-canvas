@@ -131,7 +131,11 @@ const IMAGE_PROMPT_REVERSE_PRESET = `请根据参考图片反推一段适合用�
 2. 覆盖主体、构图、风格、光线、色彩、材质、镜头和氛围。
 3. 尽量写成可直接用于生图模型的完整提示词。`;
 
-export default function CanvasPage() {
+export type CanvasPageProps = {
+    embedded?: boolean;
+};
+
+export default function CanvasPage({ embedded = false }: CanvasPageProps) {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -140,10 +144,10 @@ export default function CanvasPage() {
 
     if (!mounted) return <CanvasRefreshShell />;
 
-    return <InfiniteCanvasPage />;
+    return <InfiniteCanvasPage embedded={embedded} />;
 }
 
-function InfiniteCanvasPage() {
+function InfiniteCanvasPage({ embedded }: { embedded: boolean }) {
     const { message, modal } = App.useApp();
     // 订阅节点注册表版本,插件动态注册/卸载后驱动画布重渲染
     const nodeRegistryVersion = useNodeRegistryVersion((state) => state.version);
@@ -650,6 +654,7 @@ function InfiniteCanvasPage() {
         return map;
     }, [connections, nodes]);
     const { applyAgentOps } = useAgentBridge({
+        enabled: !embedded,
         projectId,
         title: currentProject?.title,
         nodes,
@@ -670,6 +675,7 @@ function InfiniteCanvasPage() {
     });
 
     const { pluginHost, renderPluginPanel, buildNodeToolbarItems } = usePluginHost({
+        enabled: !embedded,
         effectiveConfig,
         isAiConfigReady,
         openConfigDialog,
@@ -2766,9 +2772,10 @@ function InfiniteCanvasPage() {
 
     return (
         <main className="flex h-full min-h-0 overflow-hidden" style={{ background: theme.canvas.background, color: theme.node.text }}>
-            <CanvasSidePanel nodes={nodes} selectedNodeIds={selectedNodeIds} onFocusNode={focusNode} onPreviewNode={setPreviewNodeId} onInsertAsset={handleAssetInsert} />
+            <CanvasSidePanel embedded={embedded} nodes={nodes} selectedNodeIds={selectedNodeIds} onFocusNode={focusNode} onPreviewNode={setPreviewNodeId} onInsertAsset={handleAssetInsert} />
             <section className="relative min-w-0 flex-1 overflow-hidden">
                 <CanvasTopBar
+                    embedded={embedded}
                     title={currentProject?.title || "未命名画布"}
                     titleDraft={titleDraft}
                     isTitleEditing={titleEditing}
@@ -2993,7 +3000,7 @@ function InfiniteCanvasPage() {
                 <input ref={imageInputRef} type="file" multiple accept="image/*,video/*,audio/mpeg,audio/wav,audio/x-wav,.mp3,.wav" className="hidden" onChange={handleImageInputChange} />
 
                 <CanvasNodeInfoModal node={infoNode} open={Boolean(infoNode)} onClose={() => setInfoNodeId(null)} />
-                <CanvasPluginManagerModal open={pluginManagerOpen} onClose={() => setPluginManagerOpen(false)} />
+                {!embedded ? <CanvasPluginManagerModal open={pluginManagerOpen} onClose={() => setPluginManagerOpen(false)} /> : null}
 
                 {cropNode?.metadata?.content ? <CanvasNodeCropDialog dataUrl={cropNode.metadata.content} open={Boolean(cropNode)} onClose={() => setCropNodeId(null)} onConfirm={(crop) => void cropImageNode(cropNode!, crop)} /> : null}
 

@@ -1,0 +1,287 @@
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+@source "../components/canvas";
+@source "../pages/canvas/project.tsx";
+@source "../pages/canvas/hooks";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+.inexgrow-canvas-root {
+    --radius: 0.625rem;
+    --border: oklch(0.922 0 0);
+    --ring: oklch(0.708 0 0);
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.145 0 0);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.145 0 0);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.145 0 0);
+    --primary: oklch(0.205 0 0);
+    --primary-foreground: oklch(0.985 0 0);
+    --secondary: oklch(0.97 0 0);
+    --secondary-foreground: oklch(0.205 0 0);
+    --muted: oklch(0.97 0 0);
+    --muted-foreground: oklch(0.556 0 0);
+    --accent: oklch(0.97 0 0);
+    --accent-foreground: oklch(0.205 0 0);
+    --destructive: oklch(0.577 0.245 27.325);
+    --input: oklch(0.922 0 0);
+    height: 100%;
+    min-height: 0;
+    min-width: 0;
+    overflow: hidden;
+    color: var(--foreground);
+    color-scheme: light;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+}
+
+.inexgrow-canvas-root.dark {
+    --background: oklch(0.145 0 0);
+    --foreground: oklch(0.985 0 0);
+    --border: oklch(1 0 0 / 10%);
+    --ring: oklch(0.556 0 0);
+    --card: oklch(0.205 0 0);
+    --card-foreground: oklch(0.985 0 0);
+    --popover: oklch(0.205 0 0);
+    --popover-foreground: oklch(0.985 0 0);
+    --primary: oklch(0.922 0 0);
+    --primary-foreground: oklch(0.205 0 0);
+    --secondary: oklch(0.269 0 0);
+    --secondary-foreground: oklch(0.985 0 0);
+    --muted: oklch(0.269 0 0);
+    --muted-foreground: oklch(0.708 0 0);
+    --accent: oklch(0.269 0 0);
+    --accent-foreground: oklch(0.985 0 0);
+    --destructive: oklch(0.704 0.191 22.216);
+    --input: oklch(1 0 0 / 15%);
+    color-scheme: dark;
+}
+
+.inexgrow-canvas-root,
+.inexgrow-canvas-root * {
+    box-sizing: border-box;
+}
+
+.inexgrow-canvas-app {
+    height: 100%;
+    min-height: 0;
+}
+
+.inexgrow-canvas-loading {
+    display: grid;
+    height: 100%;
+    place-items: center;
+    color: inherit;
+    font-size: 14px;
+    opacity: 0.65;
+}
+
+.inexgrow-canvas-root .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.inexgrow-canvas-root .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.inexgrow-canvas-root .thin-scrollbar {
+    scrollbar-color: rgba(120, 113, 108, 0.45) transparent;
+    scrollbar-width: thin;
+}
+
+.inexgrow-canvas-root .thin-scrollbar::-webkit-scrollbar {
+    height: 4px;
+    width: 4px;
+}
+
+.inexgrow-canvas-root .thin-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(120, 113, 108, 0.45);
+    border-radius: 999px;
+}
+
+.inexgrow-canvas-root .hover-scrollbar {
+    scrollbar-color: transparent transparent;
+    scrollbar-width: thin;
+}
+
+.inexgrow-canvas-root .hover-scrollbar:hover {
+    scrollbar-color: rgba(120, 113, 108, 0.5) transparent;
+}
+
+.inexgrow-canvas-root .hover-scrollbar::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+}
+
+.inexgrow-canvas-root .hover-scrollbar::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 999px;
+}
+
+.inexgrow-canvas-root .hover-scrollbar:hover::-webkit-scrollbar-thumb {
+    background: rgba(120, 113, 108, 0.5);
+}
+
+.inexgrow-canvas-root textarea {
+    resize: none;
+}
+
+.inexgrow-canvas-root .canvas-control-select.ant-select .ant-select-selector,
+.inexgrow-canvas-root .canvas-control-number.ant-input-number {
+    border-color: rgba(120, 113, 108, 0.32) !important;
+    box-shadow: none !important;
+}
+
+.inexgrow-canvas-root .canvas-compact-control.canvas-control-select.ant-select,
+.inexgrow-canvas-root .canvas-compact-control.canvas-control-select.ant-select .ant-select-selector,
+.inexgrow-canvas-root .canvas-compact-control.canvas-control-number.ant-input-number {
+    height: 100% !important;
+}
+
+.inexgrow-canvas-root .canvas-compact-control.canvas-control-select.ant-select .ant-select-selection-item,
+.inexgrow-canvas-root .canvas-compact-control.canvas-control-select.ant-select .ant-select-selection-placeholder {
+    align-items: center;
+    display: flex;
+}
+
+.inexgrow-canvas-root .canvas-compact-control.canvas-control-select.ant-select .ant-select-selection-item,
+.inexgrow-canvas-root .canvas-compact-control.canvas-control-select.ant-select .ant-select-selection-placeholder,
+.inexgrow-canvas-root .canvas-compact-control.canvas-control-select.ant-select .ant-select-selection-search-input,
+.inexgrow-canvas-root .canvas-compact-control.canvas-control-number.ant-input-number .ant-input-number-input {
+    height: 100% !important;
+    line-height: 1 !important;
+}
+
+.inexgrow-canvas-root .canvas-composer-icon.ant-btn {
+    flex: 0 0 32px;
+    width: 32px;
+}
+
+.inexgrow-canvas-root .canvas-composer-tools {
+    container-type: inline-size;
+}
+
+.inexgrow-canvas-root .canvas-composer-mode-button {
+    width: 32px;
+}
+
+.inexgrow-canvas-root .canvas-composer-tools .canvas-composer-mode-button span,
+.inexgrow-canvas-root .canvas-composer-tools .canvas-model-picker-text,
+.inexgrow-canvas-root .canvas-composer-tools .canvas-select-chevron,
+.inexgrow-canvas-root .canvas-composer-tools .canvas-composer-icon.ant-btn > span:not(.ant-btn-icon) {
+    display: none;
+}
+
+.inexgrow-canvas-root .canvas-composer-tools .canvas-composer-model-picker {
+    width: 32px;
+    min-width: 32px;
+    justify-content: center;
+    gap: 0;
+    padding-inline: 0;
+}
+
+@container (min-width: 440px) {
+    .inexgrow-canvas-root .canvas-composer-mode-button {
+        padding-inline: 8px;
+        width: auto;
+    }
+
+    .inexgrow-canvas-root .canvas-composer-tools .canvas-composer-mode-button span,
+    .inexgrow-canvas-root .canvas-composer-tools .canvas-model-picker-text,
+    .inexgrow-canvas-root .canvas-composer-tools .canvas-select-chevron,
+    .inexgrow-canvas-root .canvas-composer-tools .canvas-composer-icon.ant-btn > span:not(.ant-btn-icon) {
+        display: inline-flex;
+    }
+
+    .inexgrow-canvas-root .canvas-composer-icon.ant-btn {
+        flex: 0 1 auto;
+        max-width: 170px;
+        width: auto !important;
+    }
+
+    .inexgrow-canvas-root .canvas-composer-tools .canvas-composer-model-picker {
+        width: auto;
+        min-width: 9rem;
+        justify-content: flex-start;
+        gap: 0.5rem;
+        padding-inline: 0.75rem;
+    }
+}
+
+.inexgrow-canvas-root .canvas-control-select.ant-select-focused .ant-select-selector,
+.inexgrow-canvas-root .canvas-control-number.ant-input-number-focused {
+    border-color: #a8a29e !important;
+}
+
+.inexgrow-canvas-root.dark .canvas-control-select.ant-select .ant-select-selector,
+.inexgrow-canvas-root.dark .canvas-control-number.ant-input-number {
+    border-color: rgba(214, 211, 209, 0.2) !important;
+}
+
+.inexgrow-canvas-root.dark .canvas-control-select.ant-select-focused .ant-select-selector,
+.inexgrow-canvas-root.dark .canvas-control-number.ant-input-number-focused {
+    border-color: #78716c !important;
+}
+
+.inexgrow-canvas-root .canvas-image-settings-popover .ant-popover-inner {
+    border-radius: 18px;
+    box-shadow: 0 18px 54px rgba(28, 25, 23, 0.16);
+    padding: 18px;
+}
+
+.inexgrow-canvas-root .canvas-image-settings-popover .ant-popover-inner-content {
+    max-height: calc(100vh - 96px);
+    overflow-y: auto;
+}
+
+.inexgrow-canvas-root .canvas-image-settings-popover .ant-segmented {
+    border-radius: 999px;
+    padding: 3px;
+}
+
+.inexgrow-canvas-root .canvas-image-settings-popover .ant-segmented-item {
+    border-radius: 999px;
+}
+
+.inexgrow-canvas-root.dark .canvas-image-settings-popover .ant-popover-inner {
+    box-shadow: 0 18px 54px rgba(0, 0, 0, 0.45);
+}
+
+.canvas-node-info-modal .ant-modal-header {
+    padding-right: 0;
+}
+
+.canvas-node-info-modal .ant-modal-title {
+    line-height: 1;
+}
+
+.canvas-node-info-modal .ant-modal-close {
+    top: 21px;
+}
+
+@keyframes canvas-batch-child-in {
+    from {
+        opacity: 0;
+        transform: translate(var(--batch-from-x), var(--batch-from-y)) rotate(var(--batch-from-rotate)) scale(0.72);
+    }
+    72% {
+        opacity: 1;
+        transform: translate(0, 0) rotate(-1deg) scale(1.015);
+    }
+    to {
+        opacity: 1;
+        transform: translate(0, 0) rotate(0) scale(1);
+    }
+}
+
+@keyframes canvas-batch-child-out {
+    from {
+        opacity: 1;
+        transform: translate(0, 0) rotate(0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translate(var(--batch-from-x), var(--batch-from-y)) rotate(var(--batch-from-rotate)) scale(0.72);
+    }
+}

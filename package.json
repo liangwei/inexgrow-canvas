@@ -1,0 +1,35 @@
+{
+  "name": "@inexgrow/canvas",
+  "version": "0.1.0",
+  "description": "Embeddable infinite canvas for iNexGrow director workflows",
+  "type": "module",
+  "license": "AGPL-3.0-only",
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./styles.css": "./dist/styles.css"
+  },
+  "scripts": {
+    "build": "npm --prefix web run build:package",
+    "prepack": "npm run build"
+  },
+  "peerDependencies": {
+    "antd": "^6.4.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/liangwei/inexgrow-canvas.git"
+  }
+}
