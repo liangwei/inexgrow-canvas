@@ -17,6 +17,7 @@ import "./styles.css";
 export type InexgrowCanvasProps = {
     project: CanvasProject;
     theme?: ThemeName;
+    hostManagedGeneration?: boolean;
     className?: string;
     style?: CSSProperties;
     onProjectChange?: (project: CanvasProject) => void;
@@ -44,7 +45,7 @@ export function InexgrowCanvas(props: InexgrowCanvasProps) {
     return <EmbeddedCanvas key={props.project.id} {...props} />;
 }
 
-function EmbeddedCanvas({ project, theme = "light", className, style, onProjectChange, onGenerateNode }: InexgrowCanvasProps) {
+function EmbeddedCanvas({ project, theme = "light", hostManagedGeneration = false, className, style, onProjectChange, onGenerateNode }: InexgrowCanvasProps) {
     const rootRef = useRef<HTMLDivElement>(null);
     const hydrated = useCanvasStore((state) => state.hydrated);
     const currentProject = useCanvasStore((state) => state.projects.find((item) => item.id === project.id));
@@ -101,7 +102,7 @@ function EmbeddedCanvas({ project, theme = "light", className, style, onProjectC
                         {ready ? (
                             <MemoryRouter initialEntries={[`/canvas/${encodeURIComponent(project.id)}`]}>
                                 <Routes>
-                                    <Route path="/canvas/:id" element={<CanvasPage key={canvasRevision || hostVersion} embedded onGenerateNode={onGenerateNode} />} />
+                                    <Route path="/canvas/:id" element={<CanvasPage key={canvasRevision || hostVersion} embedded hostManagedGeneration={hostManagedGeneration} onGenerateNode={onGenerateNode} />} />
                                 </Routes>
                             </MemoryRouter>
                         ) : (

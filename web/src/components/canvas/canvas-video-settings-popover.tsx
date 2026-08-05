@@ -48,7 +48,14 @@ export function CanvasVideoSettingsPopover({ config, onConfigChange, buttonClass
     return (
         <>
             <span ref={buttonRef} className="inline-flex min-w-0">
-                <Button size="small" type="text" className={buttonClassName || "!h-8 !max-w-[170px] !justify-start !rounded-full !px-2.5"} style={{ background: theme.node.fill, color: theme.node.text }} icon={<Settings2 className="size-3.5" />} onClick={() => setOpen((current) => !current)}>
+                <Button
+                    size="small"
+                    type="text"
+                    className={buttonClassName || "!h-8 !max-w-[170px] !justify-start !rounded-full !px-2.5"}
+                    style={{ background: theme.node.fill, color: theme.node.text }}
+                    icon={<Settings2 className="size-3.5" />}
+                    onClick={() => setOpen((current) => !current)}
+                >
                     <span className="truncate">
                         {videoResolutionLabel(config.vquality)} · {videoSizeLabel(config.size)} · {videoSecondsLabel(config.videoSeconds)}
                     </span>
@@ -74,37 +81,39 @@ function VideoSettingsPortal({
     config: AiConfig;
     onConfigChange: (key: keyof AiConfig, value: string) => void;
 }) {
-    const width = 356;
+    const width = Math.min(340, window.innerWidth - 24);
     const gap = 8;
     const margin = 12;
     const alignRight = placement?.endsWith("Right");
     const alignCenter = placement === "top" || placement === "bottom";
     const left = alignCenter ? buttonRect.left + buttonRect.width / 2 - width / 2 : alignRight ? buttonRect.right - width : buttonRect.left;
-    const topPlacement = placement?.startsWith("top");
+    const availableAbove = buttonRect.top - gap - margin;
+    const availableBelow = window.innerHeight - buttonRect.bottom - gap - margin;
+    const prefersTop = placement?.startsWith("top");
+    const topPlacement = prefersTop ? availableAbove >= 240 || availableAbove >= availableBelow : !(availableBelow >= 240 || availableBelow >= availableAbove);
+    const maxHeight = Math.max(160, Math.min(560, topPlacement ? availableAbove : availableBelow));
     const style = {
         position: "fixed",
         zIndex: 1200,
         width,
         left: Math.max(margin, Math.min(window.innerWidth - width - margin, left)),
-        ...(topPlacement ? { bottom: window.innerHeight - buttonRect.top + gap, maxHeight: Math.max(260, buttonRect.top - margin * 2) } : { top: buttonRect.bottom + gap, maxHeight: Math.max(260, window.innerHeight - buttonRect.bottom - margin * 2) }),
+        ...(topPlacement ? { bottom: window.innerHeight - buttonRect.top + gap } : { top: buttonRect.bottom + gap }),
+        maxHeight,
         background: theme.toolbar.panel,
+        border: `1px solid ${theme.toolbar.border}`,
         borderRadius: 18,
         boxShadow: "0 18px 54px rgba(28, 25, 23, 0.16)",
-        padding: 18,
+        boxSizing: "border-box",
+        padding: 16,
         overflowY: "auto",
+        overscrollBehavior: "contain",
+        scrollbarGutter: "stable",
         color: theme.node.text,
     } as const;
 
     return createPortal(
-        <div
-            ref={panelRef}
-            className="canvas-image-settings-popover"
-            style={style}
-            onPointerDown={(event) => event.stopPropagation()}
-            onMouseDown={(event) => event.stopPropagation()}
-            onClick={(event) => event.stopPropagation()}
-        >
-            <VideoSettingsPanel config={config} onConfigChange={(key, value) => onConfigChange(key, value)} theme={theme} className="space-y-4" />
+        <div ref={panelRef} className="canvas-image-settings-popover thin-scrollbar" style={style} onPointerDown={(event) => event.stopPropagation()} onMouseDown={(event) => event.stopPropagation()} onClick={(event) => event.stopPropagation()}>
+            <VideoSettingsPanel config={config} onConfigChange={(key, value) => onConfigChange(key, value)} theme={theme} className="space-y-3" />
         </div>,
         document.body,
     );

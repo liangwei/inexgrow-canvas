@@ -81,6 +81,7 @@ export type CanvasProject = {
 export type InexgrowCanvasProps = {
     project: CanvasProject;
     theme?: ThemeName;
+    hostManagedGeneration?: boolean;
     className?: string;
     style?: CSSProperties;
     onProjectChange?: (project: CanvasProject) => void;

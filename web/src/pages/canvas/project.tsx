@@ -133,15 +133,11 @@ const IMAGE_PROMPT_REVERSE_PRESET = `请根据参考图片反推一段适合用�
 
 export type CanvasPageProps = {
     embedded?: boolean;
-    onGenerateNode?: (request: {
-        nodeId: string;
-        mode: CanvasNodeGenerationMode;
-        prompt: string;
-        node: CanvasNodeData;
-    }) => void | Promise<void>;
+    hostManagedGeneration?: boolean;
+    onGenerateNode?: (request: { nodeId: string; mode: CanvasNodeGenerationMode; prompt: string; node: CanvasNodeData }) => void | Promise<void>;
 };
 
-export default function CanvasPage({ embedded = false, onGenerateNode }: CanvasPageProps) {
+export default function CanvasPage({ embedded = false, hostManagedGeneration = false, onGenerateNode }: CanvasPageProps) {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -150,10 +146,10 @@ export default function CanvasPage({ embedded = false, onGenerateNode }: CanvasP
 
     if (!mounted) return <CanvasRefreshShell />;
 
-    return <InfiniteCanvasPage embedded={embedded} onGenerateNode={onGenerateNode} />;
+    return <InfiniteCanvasPage embedded={embedded} hostManagedGeneration={hostManagedGeneration} onGenerateNode={onGenerateNode} />;
 }
 
-function InfiniteCanvasPage({ embedded, onGenerateNode }: Required<Pick<CanvasPageProps, "embedded">> & Pick<CanvasPageProps, "onGenerateNode">) {
+function InfiniteCanvasPage({ embedded, hostManagedGeneration, onGenerateNode }: Required<Pick<CanvasPageProps, "embedded" | "hostManagedGeneration">> & Pick<CanvasPageProps, "onGenerateNode">) {
     const { message, modal } = App.useApp();
     // 订阅节点注册表版本,插件动态注册/卸载后驱动画布重渲染
     const nodeRegistryVersion = useNodeRegistryVersion((state) => state.version);
@@ -1389,7 +1385,8 @@ function InfiniteCanvasPage({ embedded, onGenerateNode }: Required<Pick<CanvasPa
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
             const target = event.target instanceof Element ? event.target : null;
-            if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement || event.target instanceof HTMLSelectElement || target?.closest("[contenteditable='true'],[data-canvas-no-zoom],[data-canvas-shortcuts-ignore]")) return;
+            if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement || event.target instanceof HTMLSelectElement || target?.closest("[contenteditable='true'],[data-canvas-no-zoom],[data-canvas-shortcuts-ignore]"))
+                return;
 
             const key = event.key.toLowerCase();
             const isModifierShortcut = event.metaKey || event.ctrlKey;
@@ -1865,9 +1862,7 @@ function InfiniteCanvasPage({ embedded, onGenerateNode }: Required<Pick<CanvasPa
 
     const handleImageInputChange = useCallback(
         async (event: ReactChangeEvent<HTMLInputElement>) => {
-            const files = Array.from(event.target.files || []).filter(
-                (f) => f.type.startsWith("image/") || f.type.startsWith("video/") || isAudioFile(f),
-            );
+            const files = Array.from(event.target.files || []).filter((f) => f.type.startsWith("image/") || f.type.startsWith("video/") || isAudioFile(f));
             if (!files.length) {
                 uploadTargetRef.current = null;
                 event.target.value = "";
@@ -1875,12 +1870,7 @@ function InfiniteCanvasPage({ embedded, onGenerateNode }: Required<Pick<CanvasPa
             }
 
             const target = uploadTargetRef.current;
-            const basePosition =
-                target?.position ||
-                screenToCanvas(
-                    (containerRef.current?.getBoundingClientRect().left || 0) + size.width / 2,
-                    (containerRef.current?.getBoundingClientRect().top || 0) + size.height / 2,
-                );
+            const basePosition = target?.position || screenToCanvas((containerRef.current?.getBoundingClientRect().left || 0) + size.width / 2, (containerRef.current?.getBoundingClientRect().top || 0) + size.height / 2);
             const STAGGER = 40; // 多文件时的偏移间距
 
             // 如果有替换目标节点，第一个文件替换它，其余在附近新建
@@ -2002,9 +1992,7 @@ function InfiniteCanvasPage({ embedded, onGenerateNode }: Required<Pick<CanvasPa
     const handleDrop = useCallback(
         (event: ReactDragEvent<HTMLDivElement>) => {
             event.preventDefault();
-            const files = Array.from(event.dataTransfer.files).filter(
-                (item) => item.type.startsWith("image/") || item.type.startsWith("video/") || isAudioFile(item),
-            );
+            const files = Array.from(event.dataTransfer.files).filter((item) => item.type.startsWith("image/") || item.type.startsWith("video/") || isAudioFile(item));
             if (!files.length) return;
 
             const basePos = screenToCanvas(event.clientX, event.clientY);
@@ -2046,32 +2034,14 @@ function InfiniteCanvasPage({ embedded, onGenerateNode }: Required<Pick<CanvasPa
             const sourceNode = nodesRef.current.find((node) => node.id === nodeId);
             if (onGenerateNode && sourceNode) {
                 setRunningNodeId(nodeId);
-                setNodes((prev) =>
-                    prev.map((node) =>
-                        node.id === nodeId
-                            ? { ...node, metadata: { ...node.metadata, prompt, status: NODE_STATUS_LOADING, errorDetails: undefined } }
-                            : node,
-                    ),
-                );
+                setNodes((prev) => prev.map((node) => (node.id === nodeId ? { ...node, metadata: { ...node.metadata, prompt, status: NODE_STATUS_LOADING, errorDetails: undefined } } : node)));
                 try {
                     await onGenerateNode({ nodeId, mode, prompt, node: sourceNode });
-                    setNodes((prev) =>
-                        prev.map((node) =>
-                            node.id === nodeId
-                                ? { ...node, metadata: { ...node.metadata, prompt, status: NODE_STATUS_SUCCESS, errorDetails: undefined } }
-                                : node,
-                        ),
-                    );
+                    setNodes((prev) => prev.map((node) => (node.id === nodeId ? { ...node, metadata: { ...node.metadata, prompt, status: NODE_STATUS_SUCCESS, errorDetails: undefined } } : node)));
                 } catch (error) {
                     const errorDetails = error instanceof Error ? error.message : "生成失败";
                     message.error(errorDetails);
-                    setNodes((prev) =>
-                        prev.map((node) =>
-                            node.id === nodeId
-                                ? { ...node, metadata: { ...node.metadata, status: NODE_STATUS_ERROR, errorDetails } }
-                                : node,
-                        ),
-                    );
+                    setNodes((prev) => prev.map((node) => (node.id === nodeId ? { ...node, metadata: { ...node.metadata, status: NODE_STATUS_ERROR, errorDetails } } : node)));
                 } finally {
                     setRunningNodeId(null);
                 }
@@ -2144,7 +2114,8 @@ function InfiniteCanvasPage({ embedded, onGenerateNode }: Required<Pick<CanvasPa
                 return;
             }
             let pendingChildIds: string[] = [];
-            if (markSourceStatus) setNodes((prev) => prev.map((node) => (node.id === nodeId ? { ...node, metadata: { ...node.metadata, ...(node.type === CanvasNodeType.Config ? {} : { prompt }), status: NODE_STATUS_LOADING, errorDetails: undefined } } : node)));
+            if (markSourceStatus)
+                setNodes((prev) => prev.map((node) => (node.id === nodeId ? { ...node, metadata: { ...node.metadata, ...(node.type === CanvasNodeType.Config ? {} : { prompt }), status: NODE_STATUS_LOADING, errorDetails: undefined } } : node)));
 
             try {
                 if (mode === "image") {
@@ -2770,7 +2741,7 @@ function InfiniteCanvasPage({ embedded, onGenerateNode }: Required<Pick<CanvasPa
                     onChange={(composerContent) => handleConfigNodeChange(panelNode.id, { composerContent })}
                     onClose={() => setDialogNodeId(null)}
                 />
-            ) : (
+            ) : hostManagedGeneration ? null : (
                 <CanvasNodePromptPanel
                     node={panelNode}
                     isRunning={runningNodeId === panelNode.id}
@@ -2786,7 +2757,7 @@ function InfiniteCanvasPage({ embedded, onGenerateNode }: Required<Pick<CanvasPa
                     }}
                 />
             ),
-        [configInputsById, confirmStopGeneration, handleConfigNodeChange, handleGenerateNode, handleNodePromptChange, mentionReferencesByNodeId, renderPluginPanel, runningNodeId],
+        [configInputsById, confirmStopGeneration, handleConfigNodeChange, handleGenerateNode, handleNodePromptChange, hostManagedGeneration, mentionReferencesByNodeId, renderPluginPanel, runningNodeId],
     );
 
     const renderNodeContentPanel = useCallback(
@@ -2795,6 +2766,7 @@ function InfiniteCanvasPage({ embedded, onGenerateNode }: Required<Pick<CanvasPa
                 node={contentNode}
                 isRunning={runningNodeId === contentNode.id}
                 inputSummary={getInputSummary(configInputsById.get(contentNode.id) || [])}
+                hostManagedGeneration={hostManagedGeneration}
                 onConfigChange={handleConfigNodeChange}
                 onComposerToggle={() => setDialogNodeId((current) => (current === contentNode.id ? null : contentNode.id))}
                 onStop={confirmStopGeneration}
@@ -2804,7 +2776,7 @@ function InfiniteCanvasPage({ embedded, onGenerateNode }: Required<Pick<CanvasPa
                 }}
             />
         ),
-        [configInputsById, confirmStopGeneration, handleConfigNodeChange, handleGenerateNode, runningNodeId],
+        [configInputsById, confirmStopGeneration, handleConfigNodeChange, handleGenerateNode, hostManagedGeneration, runningNodeId],
     );
 
     if (!projectLoaded) return <CanvasRefreshShell />;
@@ -2995,6 +2967,7 @@ function InfiniteCanvasPage({ embedded, onGenerateNode }: Required<Pick<CanvasPa
                     canRedo={historyState.canRedo}
                     backgroundMode={backgroundMode}
                     showImageInfo={showImageInfo}
+                    showGenerationConfig={!hostManagedGeneration}
                     onAddImage={() => createNode(CanvasNodeType.Image)}
                     onAddVideo={() => createNode(CanvasNodeType.Video)}
                     onAddAudio={() => createNode(CanvasNodeType.Audio)}

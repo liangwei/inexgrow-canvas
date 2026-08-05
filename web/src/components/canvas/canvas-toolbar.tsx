@@ -14,6 +14,7 @@ export function CanvasToolbar({
     canRedo,
     backgroundMode,
     showImageInfo,
+    showGenerationConfig = true,
     onAddImage,
     onAddVideo,
     onAddAudio,
@@ -35,6 +36,7 @@ export function CanvasToolbar({
     canRedo: boolean;
     backgroundMode: CanvasBackgroundMode;
     showImageInfo: boolean;
+    showGenerationConfig?: boolean;
     onAddImage: () => void;
     onAddVideo: () => void;
     onAddAudio: () => void;
@@ -109,9 +111,11 @@ export function CanvasToolbar({
                 <ToolbarButton id="tool-audio" label="音频" hovered={hovered} hoverStyle={hoverStyle} wrapRef={wrapRef} onTipX={setTipX} onHover={setHovered} onClick={onAddAudio}>
                     <Music2 className="size-4.5" />
                 </ToolbarButton>
-                <ToolbarButton id="tool-config" label="生成配置" hovered={hovered} hoverStyle={hoverStyle} wrapRef={wrapRef} onTipX={setTipX} onHover={setHovered} onClick={onAddConfig}>
-                    <Settings2 className="size-4.5" />
-                </ToolbarButton>
+                {showGenerationConfig ? (
+                    <ToolbarButton id="tool-config" label="生成配置" hovered={hovered} hoverStyle={hoverStyle} wrapRef={wrapRef} onTipX={setTipX} onHover={setHovered} onClick={onAddConfig}>
+                        <Settings2 className="size-4.5" />
+                    </ToolbarButton>
+                ) : null}
                 <ToolbarButton id="tool-group" label="组" hovered={hovered} hoverStyle={hoverStyle} wrapRef={wrapRef} onTipX={setTipX} onHover={setHovered} onClick={onAddGroup}>
                     <Group className="size-4.5" />
                 </ToolbarButton>
