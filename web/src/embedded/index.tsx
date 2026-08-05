@@ -66,8 +66,9 @@ function EmbeddedCanvas({ project, theme = "light", hostManagedGeneration = fals
     }, [onProjectChange]);
 
     useEffect(() => {
-        if (!hydrated) return;
-        if (hostVersion === lastHostVersionRef.current) {
+        const store = useCanvasStore.getState();
+        const existing = store.projects.find((item) => item.id === normalizedProject.id);
+        if (hostVersion === lastHostVersionRef.current && existing?.updatedAt === hostVersion) {
             setReady(true);
             return;
         }
@@ -75,8 +76,6 @@ function EmbeddedCanvas({ project, theme = "light", hostManagedGeneration = fals
         // can synchronously re-enter this effect while replaceProjects emits.
         lastHostVersionRef.current = hostVersion;
         lastEmittedVersionRef.current = hostVersion;
-        const store = useCanvasStore.getState();
-        const existing = store.projects.find((item) => item.id === normalizedProject.id);
         if (!existing || existing.updatedAt !== hostVersion) {
             store.replaceProjects([normalizedProject, ...store.projects.filter((item) => item.id !== normalizedProject.id)]);
             setCanvasRevision(hostVersion);
