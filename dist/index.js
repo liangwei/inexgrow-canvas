@@ -2,7 +2,7 @@ import { jsx as d, jsxs as A, Fragment as mt } from "react/jsx-runtime";
 import * as k from "react";
 import Kt, { useMemo as Fe, useContext as on, createContext as wo, forwardRef as Wc, createElement as dc, useRef as ge, useState as J, useEffect as be, useLayoutEffect as ls, useId as Qb, useCallback as ae, Fragment as Jb, useInsertionEffect as Zb, Component as Yk, memo as ew } from "react";
 import { Button as $e, Image as tw, Switch as Ji, ConfigProvider as nw, Segmented as ti, Modal as Xt, Slider as rw, Tooltip as Bt, Input as ui, InputNumber as Xk, App as Nr, theme as Qd, Typography as Hm, Card as ow, Space as Vl, Form as Wm, Checkbox as qm, Tag as Wn, Spin as Jd, Empty as mo, Pagination as Qk, Popconfirm as iw, Select as Jk, Tabs as Zk, Timeline as eE, Dropdown as tE } from "antd";
-import nE from "antd/locale/zh_CN";
+import nE from "antd/locale/zh_CN.js";
 import * as qc from "react-dom";
 import rE, { createPortal as di, flushSync as oE } from "react-dom";
 var xs = class {

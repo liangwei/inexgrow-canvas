@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { App, ConfigProvider } from "antd";
-import zhCN from "antd/locale/zh_CN";
+import zhCN from "antd/locale/zh_CN.js";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 
 import CanvasPage from "@/pages/canvas/project";
