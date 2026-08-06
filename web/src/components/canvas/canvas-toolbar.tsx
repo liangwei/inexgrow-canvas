@@ -14,6 +14,7 @@ export function CanvasToolbar({
     canRedo,
     backgroundMode,
     showImageInfo,
+    lockTheme = false,
     showGenerationConfig = true,
     onAddImage,
     onAddVideo,
@@ -36,6 +37,7 @@ export function CanvasToolbar({
     canRedo: boolean;
     backgroundMode: CanvasBackgroundMode;
     showImageInfo: boolean;
+    lockTheme?: boolean;
     showGenerationConfig?: boolean;
     onAddImage: () => void;
     onAddVideo: () => void;
@@ -211,18 +213,22 @@ export function CanvasToolbar({
                     style={{ left: panelX || "50%", background: theme.toolbar.panel, borderColor: theme.toolbar.border, color: theme.toolbar.item }}
                 >
                     <div className="px-1 pb-2 text-sm font-medium opacity-65">画布外观</div>
-                    <div className="px-1 pb-1.5 text-[11px] font-medium opacity-50">主题模式</div>
-                    <div className="grid grid-cols-2 gap-1 rounded-lg p-1" style={{ background: theme.toolbar.itemHover }}>
-                        <CanvasThemeButton colorTheme={colorTheme} targetTheme="light" onThemeChange={setTheme}>
-                            <Sun className="size-4" />
-                            浅色
-                        </CanvasThemeButton>
-                        <CanvasThemeButton colorTheme={colorTheme} targetTheme="dark" onThemeChange={setTheme}>
-                            <Moon className="size-4" />
-                            深色
-                        </CanvasThemeButton>
-                    </div>
-                    <div className="mt-3 px-1 pb-1.5 text-[11px] font-medium opacity-50">网格样式</div>
+                    {!lockTheme ? (
+                        <>
+                            <div className="px-1 pb-1.5 text-[11px] font-medium opacity-50">主题模式</div>
+                            <div className="grid grid-cols-2 gap-1 rounded-lg p-1" style={{ background: theme.toolbar.itemHover }}>
+                                <CanvasThemeButton colorTheme={colorTheme} targetTheme="light" onThemeChange={setTheme}>
+                                    <Sun className="size-4" />
+                                    浅色
+                                </CanvasThemeButton>
+                                <CanvasThemeButton colorTheme={colorTheme} targetTheme="dark" onThemeChange={setTheme}>
+                                    <Moon className="size-4" />
+                                    深色
+                                </CanvasThemeButton>
+                            </div>
+                        </>
+                    ) : null}
+                    <div className={`${lockTheme ? "" : "mt-3 "}px-1 pb-1.5 text-[11px] font-medium opacity-50`}>网格样式</div>
                     <Segmented
                         className="w-full !p-1 [&_.ant-segmented-group]:!flex [&_.ant-segmented-item]:!min-h-8 [&_.ant-segmented-item]:!flex-1 [&_.ant-segmented-item-label]:!min-h-8 [&_.ant-segmented-item-label]:!leading-8"
                         value={backgroundMode}

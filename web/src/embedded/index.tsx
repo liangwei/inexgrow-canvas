@@ -17,6 +17,8 @@ import "./styles.css";
 export type InexgrowCanvasProps = {
     project: CanvasProject;
     theme?: ThemeName;
+    /** When embedded in a host application, the host owns the color theme. */
+    lockTheme?: boolean;
     hostManagedGeneration?: boolean;
     className?: string;
     style?: CSSProperties;
@@ -45,7 +47,7 @@ export function InexgrowCanvas(props: InexgrowCanvasProps) {
     return <EmbeddedCanvas key={props.project.id} {...props} />;
 }
 
-function EmbeddedCanvas({ project, theme = "light", hostManagedGeneration = false, className, style, onProjectChange, onGenerateNode }: InexgrowCanvasProps) {
+function EmbeddedCanvas({ project, theme = "light", lockTheme = false, hostManagedGeneration = false, className, style, onProjectChange, onGenerateNode }: InexgrowCanvasProps) {
     const rootRef = useRef<HTMLDivElement>(null);
     const hydrated = useCanvasStore((state) => state.hydrated);
     const currentProject = useCanvasStore((state) => state.projects.find((item) => item.id === project.id));
@@ -121,7 +123,7 @@ function EmbeddedCanvas({ project, theme = "light", hostManagedGeneration = fals
                         {ready ? (
                             <MemoryRouter initialEntries={[`/canvas/${encodeURIComponent(project.id)}`]}>
                                 <Routes>
-                                    <Route path="/canvas/:id" element={<CanvasPage embedded hostManagedGeneration={hostManagedGeneration} externalProjectRevision={canvasRevision} onGenerateNode={onGenerateNode} />} />
+                                    <Route path="/canvas/:id" element={<CanvasPage embedded lockTheme={lockTheme} hostManagedGeneration={hostManagedGeneration} externalProjectRevision={canvasRevision} onGenerateNode={onGenerateNode} />} />
                                 </Routes>
                             </MemoryRouter>
                         ) : (

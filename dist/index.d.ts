@@ -83,6 +83,7 @@ export type CanvasProject = {
 export type InexgrowCanvasProps = {
     project: CanvasProject;
     theme?: ThemeName;
+    lockTheme?: boolean;
     hostManagedGeneration?: boolean;
     className?: string;
     style?: CSSProperties;

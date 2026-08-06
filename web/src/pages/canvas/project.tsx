@@ -133,12 +133,13 @@ const IMAGE_PROMPT_REVERSE_PRESET = `请根据参考图片反推一段适合用�
 
 export type CanvasPageProps = {
     embedded?: boolean;
+    lockTheme?: boolean;
     hostManagedGeneration?: boolean;
     externalProjectRevision?: string;
     onGenerateNode?: (request: { nodeId: string; mode: CanvasNodeGenerationMode; prompt: string; node: CanvasNodeData }) => void | Promise<void>;
 };
 
-export default function CanvasPage({ embedded = false, hostManagedGeneration = false, externalProjectRevision = "", onGenerateNode }: CanvasPageProps) {
+export default function CanvasPage({ embedded = false, lockTheme = false, hostManagedGeneration = false, externalProjectRevision = "", onGenerateNode }: CanvasPageProps) {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -147,10 +148,10 @@ export default function CanvasPage({ embedded = false, hostManagedGeneration = f
 
     if (!mounted) return <CanvasRefreshShell />;
 
-    return <InfiniteCanvasPage embedded={embedded} hostManagedGeneration={hostManagedGeneration} externalProjectRevision={externalProjectRevision} onGenerateNode={onGenerateNode} />;
+    return <InfiniteCanvasPage embedded={embedded} lockTheme={lockTheme} hostManagedGeneration={hostManagedGeneration} externalProjectRevision={externalProjectRevision} onGenerateNode={onGenerateNode} />;
 }
 
-function InfiniteCanvasPage({ embedded, hostManagedGeneration, externalProjectRevision, onGenerateNode }: Required<Pick<CanvasPageProps, "embedded" | "hostManagedGeneration" | "externalProjectRevision">> & Pick<CanvasPageProps, "onGenerateNode">) {
+function InfiniteCanvasPage({ embedded, lockTheme, hostManagedGeneration, externalProjectRevision, onGenerateNode }: Required<Pick<CanvasPageProps, "embedded" | "lockTheme" | "hostManagedGeneration" | "externalProjectRevision">> & Pick<CanvasPageProps, "onGenerateNode">) {
     const { message, modal } = App.useApp();
     // 订阅节点注册表版本,插件动态注册/卸载后驱动画布重渲染
     const nodeRegistryVersion = useNodeRegistryVersion((state) => state.version);
@@ -2984,6 +2985,7 @@ function InfiniteCanvasPage({ embedded, hostManagedGeneration, externalProjectRe
                     canRedo={historyState.canRedo}
                     backgroundMode={backgroundMode}
                     showImageInfo={showImageInfo}
+                    lockTheme={lockTheme}
                     showGenerationConfig={!hostManagedGeneration}
                     onAddImage={() => createNode(CanvasNodeType.Image)}
                     onAddVideo={() => createNode(CanvasNodeType.Video)}
