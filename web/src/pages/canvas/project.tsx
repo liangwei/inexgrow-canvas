@@ -134,10 +134,11 @@ const IMAGE_PROMPT_REVERSE_PRESET = `请根据参考图片反推一段适合用�
 export type CanvasPageProps = {
     embedded?: boolean;
     hostManagedGeneration?: boolean;
+    externalProjectRevision?: string;
     onGenerateNode?: (request: { nodeId: string; mode: CanvasNodeGenerationMode; prompt: string; node: CanvasNodeData }) => void | Promise<void>;
 };
 
-export default function CanvasPage({ embedded = false, hostManagedGeneration = false, onGenerateNode }: CanvasPageProps) {
+export default function CanvasPage({ embedded = false, hostManagedGeneration = false, externalProjectRevision = "", onGenerateNode }: CanvasPageProps) {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -146,10 +147,10 @@ export default function CanvasPage({ embedded = false, hostManagedGeneration = f
 
     if (!mounted) return <CanvasRefreshShell />;
 
-    return <InfiniteCanvasPage embedded={embedded} hostManagedGeneration={hostManagedGeneration} onGenerateNode={onGenerateNode} />;
+    return <InfiniteCanvasPage embedded={embedded} hostManagedGeneration={hostManagedGeneration} externalProjectRevision={externalProjectRevision} onGenerateNode={onGenerateNode} />;
 }
 
-function InfiniteCanvasPage({ embedded, hostManagedGeneration, onGenerateNode }: Required<Pick<CanvasPageProps, "embedded" | "hostManagedGeneration">> & Pick<CanvasPageProps, "onGenerateNode">) {
+function InfiniteCanvasPage({ embedded, hostManagedGeneration, externalProjectRevision, onGenerateNode }: Required<Pick<CanvasPageProps, "embedded" | "hostManagedGeneration" | "externalProjectRevision">> & Pick<CanvasPageProps, "onGenerateNode">) {
     const { message, modal } = App.useApp();
     // 订阅节点注册表版本,插件动态注册/卸载后驱动画布重渲染
     const nodeRegistryVersion = useNodeRegistryVersion((state) => state.version);
@@ -261,6 +262,7 @@ function InfiniteCanvasPage({ embedded, hostManagedGeneration, onGenerateNode }:
     const selectionBoxRef = useRef(selectionBox);
     const pendingConnectionCreateRef = useRef(pendingConnectionCreate);
     const generationRequestsRef = useRef(new Map<string, CanvasGenerationRequest>());
+    const lastHostProjectRevisionRef = useRef<{ projectId: string; revision: string } | null>(null);
 
     const createHistoryEntry = useCallback(
         (): CanvasHistoryEntry => ({
@@ -323,41 +325,51 @@ function InfiniteCanvasPage({ embedded, hostManagedGeneration, onGenerateNode }:
 
     useEffect(() => {
         if (!hydrated) return;
-        setProjectLoaded(false);
+        const previousHostRevision = lastHostProjectRevisionRef.current;
+        const isProjectChange = previousHostRevision?.projectId !== projectId;
+        if (isProjectChange) setProjectLoaded(false);
         const project = openProject(projectId);
         if (!project) {
             navigate("/canvas", { replace: true });
             return;
         }
 
+        let cancelled = false;
         const restore = async () => {
             const restoredNodes = await hydrateCanvasImages(resetInterruptedGeneration(project.nodes));
             const restoredSessions = await hydrateAssistantImages(project.chatSessions || []);
+            if (cancelled) return;
             setNodes(restoredNodes);
             setConnections(project.connections);
             setChatSessions(restoredSessions);
             setActiveChatId(project.activeChatId || null);
             setBackgroundMode(project.backgroundMode);
             setShowImageInfo(project.showImageInfo || false);
-            setViewport(project.viewport);
-            historyRef.current = { past: [], future: [] };
-            if (historyCommitTimerRef.current) {
-                clearTimeout(historyCommitTimerRef.current);
-                historyCommitTimerRef.current = null;
+            if (isProjectChange) {
+                setViewport(project.viewport);
+                historyRef.current = { past: [], future: [] };
+                if (historyCommitTimerRef.current) {
+                    clearTimeout(historyCommitTimerRef.current);
+                    historyCommitTimerRef.current = null;
+                }
+                lastHistoryRef.current = {
+                    nodes: restoredNodes,
+                    connections: project.connections,
+                    chatSessions: restoredSessions,
+                    activeChatId: project.activeChatId || null,
+                    backgroundMode: project.backgroundMode,
+                    showImageInfo: project.showImageInfo || false,
+                };
+                setHistoryState({ canUndo: false, canRedo: false });
             }
-            lastHistoryRef.current = {
-                nodes: restoredNodes,
-                connections: project.connections,
-                chatSessions: restoredSessions,
-                activeChatId: project.activeChatId || null,
-                backgroundMode: project.backgroundMode,
-                showImageInfo: project.showImageInfo || false,
-            };
-            setHistoryState({ canUndo: false, canRedo: false });
+            lastHostProjectRevisionRef.current = { projectId, revision: externalProjectRevision };
             setProjectLoaded(true);
         };
         void restore();
-    }, [hydrated, navigate, openProject, projectId]);
+        return () => {
+            cancelled = true;
+        };
+    }, [externalProjectRevision, hydrated, navigate, openProject, projectId]);
 
     useEffect(() => {
         if (!projectLoaded || !["new", "recent", "choose"].includes(searchParams.get("mode") || "")) return;

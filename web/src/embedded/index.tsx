@@ -121,7 +121,7 @@ function EmbeddedCanvas({ project, theme = "light", hostManagedGeneration = fals
                         {ready ? (
                             <MemoryRouter initialEntries={[`/canvas/${encodeURIComponent(project.id)}`]}>
                                 <Routes>
-                                    <Route path="/canvas/:id" element={<CanvasPage key={canvasRevision || hostVersion} embedded hostManagedGeneration={hostManagedGeneration} onGenerateNode={onGenerateNode} />} />
+                                    <Route path="/canvas/:id" element={<CanvasPage embedded hostManagedGeneration={hostManagedGeneration} externalProjectRevision={canvasRevision} onGenerateNode={onGenerateNode} />} />
                                 </Routes>
                             </MemoryRouter>
                         ) : (
