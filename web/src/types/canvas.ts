@@ -63,6 +63,8 @@ export type CanvasNodeMetadata = {
     bytes?: number;
     durationMs?: number;
     groupId?: string;
+    badgeLabel?: string;
+    badgeTone?: "default" | "info" | "success" | "warning" | "danger";
     interactive?: boolean; // 插件节点「交互 ⇄ 移动」开关状态(见 CanvasNodeDefinition.interactionToggle)
 };
 

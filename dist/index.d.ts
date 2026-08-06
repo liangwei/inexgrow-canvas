@@ -37,6 +37,8 @@ export type CanvasNodeMetadata = {
     bytes?: number;
     durationMs?: number;
     groupId?: string;
+    badgeLabel?: string;
+    badgeTone?: "default" | "info" | "success" | "warning" | "danger";
     [key: string]: unknown;
 };
 

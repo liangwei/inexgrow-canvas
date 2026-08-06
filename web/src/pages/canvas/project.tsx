@@ -2471,6 +2471,11 @@ function InfiniteCanvasPage({ embedded, hostManagedGeneration, onGenerateNode }:
     const handleRetryNode = useCallback(
         async (node: CanvasNodeData) => {
             const sourceNode = findRetrySourceNode(node.id, nodesRef.current, connectionsRef.current) || node;
+            if (hostManagedGeneration && onGenerateNode) {
+                const mode = sourceNode.metadata?.generationMode || "video";
+                await handleGenerateNode(sourceNode.id, mode, sourceNode.metadata?.composerContent ?? sourceNode.metadata?.prompt ?? "");
+                return;
+            }
             const batchRoot = node.metadata?.batchRootId ? nodesRef.current.find((item) => item.id === node.metadata?.batchRootId) : null;
             const savedImageMetadata = node.type === CanvasNodeType.Image ? { ...batchRoot?.metadata, ...node.metadata } : undefined;
             const hasSavedImageMetadata = Boolean(savedImageMetadata?.generationType);
@@ -2601,7 +2606,7 @@ function InfiniteCanvasPage({ embedded, hostManagedGeneration, onGenerateNode }:
                 setRunningNodeId(null);
             }
         },
-        [effectiveConfig, finishGenerationRequest, isAiConfigReady, message, openConfigDialog, startGenerationRequest],
+        [effectiveConfig, finishGenerationRequest, handleGenerateNode, hostManagedGeneration, isAiConfigReady, message, onGenerateNode, openConfigDialog, startGenerationRequest],
     );
 
     const generateImageFromTextNode = useCallback(

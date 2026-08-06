@@ -30,6 +30,10 @@ export function CanvasConfigNodePanel({ node, isRunning, hostManagedGeneration =
     const mode = hostManagedGeneration ? "video" : node.metadata?.generationMode || "image";
     const config = buildNodeConfig(globalConfig, node, mode);
     const chipStyle = { background: theme.node.fill, borderColor: theme.node.stroke, color: theme.node.text };
+    const badgeLabel = String(node.metadata?.badgeLabel || "").trim();
+    const badgeTone = node.metadata?.badgeTone || "default";
+    const badgeColor = badgeTone === "success" ? "#16a34a" : badgeTone === "warning" ? "#d97706" : badgeTone === "danger" ? "#dc2626" : badgeTone === "info" ? "#2563eb" : theme.node.muted;
+    const badgeStyle = { background: `${badgeColor}18`, borderColor: `${badgeColor}66`, color: badgeColor };
     const hasAnyInput = Boolean(inputSummary.textCount || inputSummary.imageCount || inputSummary.videoCount || inputSummary.audioCount);
     const hasComposerContent = Boolean((node.metadata?.composerContent ?? node.metadata?.prompt ?? "").trim());
     const canGenerate = hasComposerContent || (mode === "audio" ? inputSummary.textCount > 0 : hasAnyInput);
@@ -39,9 +43,16 @@ export function CanvasConfigNodePanel({ node, isRunning, hostManagedGeneration =
             <div className="mb-2 flex items-center justify-between gap-3">
                 <div className="shrink-0 text-sm font-semibold">{hostManagedGeneration ? "分镜生成" : "生成配置"}</div>
                 {hostManagedGeneration ? (
-                    <div className="inline-flex h-7 items-center gap-1 rounded-md border px-2 text-xs" style={chipStyle}>
-                        <Video className="size-3.5" />
-                        视频
+                    <div className="flex shrink-0 items-center gap-1.5">
+                        <div className="inline-flex h-7 items-center gap-1 rounded-md border px-2 text-xs" style={chipStyle}>
+                            <Video className="size-3.5" />
+                            视频
+                        </div>
+                        {badgeLabel ? (
+                            <div className="inline-flex h-7 max-w-[92px] items-center truncate rounded-md border px-2 text-xs" style={badgeStyle} title={badgeLabel}>
+                                <span className="truncate">{badgeLabel}</span>
+                            </div>
+                        ) : null}
                     </div>
                 ) : (
                     <div className="cursor-default" onMouseDown={(event) => event.stopPropagation()}>
