@@ -84,6 +84,10 @@ export type InexgrowCanvasProps = {
     project: CanvasProject;
     theme?: ThemeName;
     lockTheme?: boolean;
+    primaryColor?: string;
+    primaryHoverColor?: string;
+    primaryActiveColor?: string;
+    primaryTextColor?: string;
     hostManagedGeneration?: boolean;
     className?: string;
     style?: CSSProperties;

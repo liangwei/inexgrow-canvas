@@ -26,6 +26,10 @@
     --accent-foreground: oklch(0.205 0 0);
     --destructive: oklch(0.577 0.245 27.325);
     --input: oklch(0.922 0 0);
+    --inexgrow-canvas-primary: #7c3aed;
+    --inexgrow-canvas-primary-hover: #6d28d9;
+    --inexgrow-canvas-primary-active: #5b21b6;
+    --inexgrow-canvas-primary-text: #ffffff;
     height: 100%;
     min-height: 0;
     min-width: 0;
@@ -54,6 +58,10 @@
     --accent-foreground: oklch(0.985 0 0);
     --destructive: oklch(0.704 0.191 22.216);
     --input: oklch(1 0 0 / 15%);
+    --inexgrow-canvas-primary: #8b5cf6;
+    --inexgrow-canvas-primary-hover: #7c3aed;
+    --inexgrow-canvas-primary-active: #6d28d9;
+    --inexgrow-canvas-primary-text: #ffffff;
     color-scheme: dark;
 }
 
@@ -104,14 +112,20 @@
 }
 
 .inexgrow-canvas-root .canvas-director-generate-button.ant-btn-primary:not(:disabled):not(.ant-btn-dangerous) {
-    background: #7c3aed !important;
-    border-color: #7c3aed !important;
-    box-shadow: 0 6px 16px rgba(124, 58, 237, 0.18);
+    background: var(--inexgrow-canvas-primary) !important;
+    border-color: var(--inexgrow-canvas-primary) !important;
+    color: var(--inexgrow-canvas-primary-text) !important;
+    box-shadow: none;
 }
 
 .inexgrow-canvas-root .canvas-director-generate-button.ant-btn-primary:not(:disabled):not(.ant-btn-dangerous):hover {
-    background: #6d28d9 !important;
-    border-color: #6d28d9 !important;
+    background: var(--inexgrow-canvas-primary-hover) !important;
+    border-color: var(--inexgrow-canvas-primary-hover) !important;
+}
+
+.inexgrow-canvas-root .canvas-director-generate-button.ant-btn-primary:not(:disabled):not(.ant-btn-dangerous):active {
+    background: var(--inexgrow-canvas-primary-active) !important;
+    border-color: var(--inexgrow-canvas-primary-active) !important;
 }
 
 .inexgrow-canvas-root.dark .canvas-director-config-node > div:nth-child(2) > *,
@@ -119,17 +133,6 @@
     background: rgba(255, 255, 255, 0.055) !important;
     border-color: rgba(255, 255, 255, 0.12) !important;
     color: #d6d3d1 !important;
-}
-
-.inexgrow-canvas-root.dark .canvas-director-generate-button.ant-btn-primary:not(:disabled):not(.ant-btn-dangerous) {
-    background: #8b5cf6 !important;
-    border-color: #8b5cf6 !important;
-    color: #ffffff !important;
-}
-
-.inexgrow-canvas-root.dark .canvas-director-generate-button.ant-btn-primary:not(:disabled):not(.ant-btn-dangerous):hover {
-    background: #7c3aed !important;
-    border-color: #7c3aed !important;
 }
 
 .inexgrow-canvas-root .hide-scrollbar {

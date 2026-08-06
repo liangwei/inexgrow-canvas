@@ -19,6 +19,11 @@ export type InexgrowCanvasProps = {
     theme?: ThemeName;
     /** When embedded in a host application, the host owns the color theme. */
     lockTheme?: boolean;
+    /** Optional host design-system colors used by embedded primary actions. */
+    primaryColor?: string;
+    primaryHoverColor?: string;
+    primaryActiveColor?: string;
+    primaryTextColor?: string;
     hostManagedGeneration?: boolean;
     className?: string;
     style?: CSSProperties;
@@ -47,7 +52,20 @@ export function InexgrowCanvas(props: InexgrowCanvasProps) {
     return <EmbeddedCanvas key={props.project.id} {...props} />;
 }
 
-function EmbeddedCanvas({ project, theme = "light", lockTheme = false, hostManagedGeneration = false, className, style, onProjectChange, onGenerateNode }: InexgrowCanvasProps) {
+function EmbeddedCanvas({
+    project,
+    theme = "light",
+    lockTheme = false,
+    primaryColor,
+    primaryHoverColor,
+    primaryActiveColor,
+    primaryTextColor,
+    hostManagedGeneration = false,
+    className,
+    style,
+    onProjectChange,
+    onGenerateNode,
+}: InexgrowCanvasProps) {
     const rootRef = useRef<HTMLDivElement>(null);
     const hydrated = useCanvasStore((state) => state.hydrated);
     const currentProject = useCanvasStore((state) => state.projects.find((item) => item.id === project.id));
@@ -114,10 +132,26 @@ function EmbeddedCanvas({ project, theme = "light", lockTheme = false, hostManag
 
     const dark = theme === "dark";
     const rootClassName = ["inexgrow-canvas-root", dark ? "dark" : "", className || ""].filter(Boolean).join(" ");
+    const rootStyle = {
+        ...style,
+        "--inexgrow-canvas-primary": primaryColor,
+        "--inexgrow-canvas-primary-hover": primaryHoverColor,
+        "--inexgrow-canvas-primary-active": primaryActiveColor,
+        "--inexgrow-canvas-primary-text": primaryTextColor,
+    } as CSSProperties;
 
     return (
-        <div ref={rootRef} className={rootClassName} data-inexgrow-canvas-theme={theme} style={style}>
-            <ConfigProvider locale={zhCN} theme={getAntThemeConfig(dark)} getPopupContainer={() => rootRef.current || document.body}>
+        <div ref={rootRef} className={rootClassName} data-inexgrow-canvas-theme={theme} style={rootStyle}>
+            <ConfigProvider
+                locale={zhCN}
+                theme={getAntThemeConfig(dark, {
+                    primary: primaryColor,
+                    primaryHover: primaryHoverColor,
+                    primaryActive: primaryActiveColor,
+                    primaryText: primaryTextColor,
+                })}
+                getPopupContainer={() => rootRef.current || document.body}
+            >
                 <App className="inexgrow-canvas-app">
                     <QueryClientProvider client={queryClient}>
                         {ready ? (

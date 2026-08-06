@@ -28,19 +28,32 @@ const neutral = {
     },
 };
 
-export function getAntThemeConfig(dark: boolean): ThemeConfig {
+type ThemeColorOverrides = {
+    primary?: string;
+    primaryHover?: string;
+    primaryActive?: string;
+    primaryText?: string;
+};
+
+export function getAntThemeConfig(dark: boolean, overrides: ThemeColorOverrides = {}): ThemeConfig {
     const color = dark ? neutral.dark : neutral.light;
+    const primary = overrides.primary || color.primary;
+    const primaryHover = overrides.primaryHover || color.primaryHover;
+    const primaryActive = overrides.primaryActive || primary;
+    const primaryText = overrides.primaryText || color.primaryText;
 
     return {
         algorithm: dark ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
         cssVar: { key: dark ? "infinite-canvas-dark" : "infinite-canvas-light" },
         token: {
-            colorPrimary: color.primary,
-            colorInfo: color.primary,
-            colorLink: color.primary,
-            colorLinkHover: color.primaryHover,
-            colorLinkActive: color.primary,
-            colorTextLightSolid: color.primaryText,
+            colorPrimary: primary,
+            colorPrimaryHover: primaryHover,
+            colorPrimaryActive: primaryActive,
+            colorInfo: primary,
+            colorLink: primary,
+            colorLinkHover: primaryHover,
+            colorLinkActive: primaryActive,
+            colorTextLightSolid: primaryText,
         },
         components: {
             Button: {
