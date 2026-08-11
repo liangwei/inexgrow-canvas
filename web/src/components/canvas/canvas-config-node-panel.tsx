@@ -37,6 +37,10 @@ export function CanvasConfigNodePanel({ node, isRunning, hostManagedGeneration =
     const hasAnyInput = Boolean(inputSummary.textCount || inputSummary.imageCount || inputSummary.videoCount || inputSummary.audioCount);
     const hasComposerContent = Boolean((node.metadata?.composerContent ?? node.metadata?.prompt ?? "").trim());
     const canGenerate = hasComposerContent || (mode === "audio" ? inputSummary.textCount > 0 : hasAnyInput);
+    const generationActionLabel = hostManagedGeneration ? String(node.metadata?.generationActionLabel || "").trim() : "";
+    const generationDisabled = hostManagedGeneration && node.metadata?.generationDisabled === true;
+    const generationDisabledReason = generationDisabled ? String(node.metadata?.generationDisabledReason || "").trim() : "";
+    const actionDisabled = !isRunning && (!canGenerate || generationDisabled);
 
     return (
         <div className={`flex h-full w-full cursor-move flex-col px-3 pb-3 pt-7 text-sm${hostManagedGeneration ? " canvas-director-config-node" : ""}`} style={{ color: theme.node.text }} onWheel={(event) => event.stopPropagation()}>
@@ -157,9 +161,10 @@ export function CanvasConfigNodePanel({ node, isRunning, hostManagedGeneration =
 
             <Button
                 type="primary"
-                className={`mt-auto !h-9 !w-full !cursor-pointer !rounded-lg${hostManagedGeneration ? " canvas-director-generate-button" : ""}`}
+                className={`mt-auto !h-9 !w-full !rounded-lg${actionDisabled ? " !cursor-not-allowed" : " !cursor-pointer"}${hostManagedGeneration ? " canvas-director-generate-button" : ""}`}
                 danger={isRunning}
-                disabled={!isRunning && !canGenerate}
+                disabled={actionDisabled}
+                title={!isRunning ? generationDisabledReason || undefined : undefined}
                 onMouseDown={(event) => event.stopPropagation()}
                 onClick={() => (isRunning ? onStop(node.id) : onGenerate(node.id))}
             >
@@ -173,7 +178,7 @@ export function CanvasConfigNodePanel({ node, isRunning, hostManagedGeneration =
                     ) : (
                         <>
                             <Play className="size-4" />
-                            <span>开始生成</span>
+                            <span>{generationActionLabel || "开始生成"}</span>
                         </>
                     )}
                 </span>

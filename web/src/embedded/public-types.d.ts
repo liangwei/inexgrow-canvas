@@ -39,6 +39,9 @@ export type CanvasNodeMetadata = {
     groupId?: string;
     badgeLabel?: string;
     badgeTone?: "default" | "info" | "success" | "warning" | "danger";
+    generationActionLabel?: string;
+    generationDisabled?: boolean;
+    generationDisabledReason?: string;
     [key: string]: unknown;
 };
 
