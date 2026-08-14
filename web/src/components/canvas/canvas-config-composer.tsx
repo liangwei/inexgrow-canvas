@@ -10,6 +10,7 @@ import type { NodeGenerationInput } from "./canvas-node-generation";
 type CanvasConfigComposerProps = {
     value: string;
     inputs: NodeGenerationInput[];
+    hostManagedGeneration?: boolean;
     onChange: (value: string) => void;
     onClose: () => void;
 };
@@ -23,8 +24,9 @@ type MentionState = {
 };
 
 export const CONFIG_REFERENCE_PATTERN = /@\[node:([^\]]+)\]/g;
+const DIRECTOR_PROMPT_MAX_LENGTH = 499;
 
-export function CanvasConfigComposer({ value, inputs, onChange, onClose }: CanvasConfigComposerProps) {
+export function CanvasConfigComposer({ value, inputs, hostManagedGeneration = false, onChange, onClose }: CanvasConfigComposerProps) {
     const theme = canvasThemes[useThemeStore((state) => state.theme)];
     const editorRef = useRef<HTMLDivElement>(null);
     const composingRef = useRef(false);
@@ -44,22 +46,19 @@ export function CanvasConfigComposer({ value, inputs, onChange, onClose }: Canva
         if (document.activeElement === editorRef.current) return;
         const editor = editorRef.current;
         if (!editor) return;
-        editor.textContent = "";
-        tokens.forEach((token) => {
-            if (token.type === "text") {
-                editor.append(document.createTextNode(token.value));
-                return;
-            }
-            const input = referenceById.get(token.nodeId);
-            if (input) editor.append(createReferenceChip(input, inputs, theme, setImagePreview));
-        });
+        renderComposerValue(editor, tokens, referenceById, inputs, theme, setImagePreview);
     }, [inputs, referenceById, theme, tokens]);
 
     const syncFromEditor = () => {
         const editor = editorRef.current;
         if (!editor) return;
         const next = serializeEditor(editor);
-        onChange(next);
+        const normalized = hostManagedGeneration ? clampComposerValue(next, DIRECTOR_PROMPT_MAX_LENGTH, inputs) : next;
+        if (normalized !== next) {
+            renderComposerValue(editor, parseComposerTokens(normalized), referenceById, inputs, theme, setImagePreview);
+            placeCaretAtEnd(editor);
+        }
+        onChange(normalized);
         syncMention();
     };
 
@@ -99,7 +98,7 @@ export function CanvasConfigComposer({ value, inputs, onChange, onClose }: Canva
             placeCaretAtEnd(editor);
         }
         closeMention();
-        onChange(serializeEditor(editor));
+        syncFromEditor();
     };
 
     const stopCanvasInteraction = (event: PointerEvent | MouseEvent) => event.stopPropagation();
@@ -115,13 +114,17 @@ export function CanvasConfigComposer({ value, inputs, onChange, onClose }: Canva
         >
             <div className="mb-2 flex items-center justify-between gap-2">
                 <div className="flex min-w-0 items-baseline gap-2">
-                    <div className="shrink-0 text-xs font-semibold">组装提示词</div>
-                    <div className="truncate text-[11px] opacity-55">@ 引用已连接资产，发送前按当前连接重新编号</div>
+                    <div className="shrink-0 text-xs font-semibold">{hostManagedGeneration ? "分镜描述" : "组装提示词"}</div>
+                    <div className="truncate text-[11px] opacity-55">
+                        {hostManagedGeneration
+                            ? `可自由编辑，生成前自动编译 · ${composerCharacterLength(value, inputs)}/${DIRECTOR_PROMPT_MAX_LENGTH} 字`
+                            : "@ 引用已连接资产，发送前按当前连接重新编号"}
+                    </div>
                 </div>
                 <Button size="small" type="text" className="!h-7 !w-7 !min-w-7 !p-0" icon={<X className="size-3.5" />} onClick={onClose} />
             </div>
             <div className="relative rounded-xl">
-                {!value.trim() ? <div className="pointer-events-none absolute left-3 top-2 text-sm leading-7" style={{ color: theme.node.placeholder }}>输入提示词，按 @ 引用连接的图片或文本</div> : null}
+                {!value.trim() ? <div className="pointer-events-none absolute left-3 top-2 text-sm leading-7" style={{ color: theme.node.placeholder }}>{hostManagedGeneration ? "描述本镜头想发生的内容，按 @ 引用连接素材" : "输入提示词，按 @ 引用连接的图片或文本"}</div> : null}
                 <div
                     ref={editorRef}
                     contentEditable
@@ -273,6 +276,63 @@ function serializeNodes(nodes: NodeListOf<ChildNode>) {
         else result += serializeNodes(node.childNodes);
     });
     return result;
+}
+
+function composerCharacterLength(value: string, inputs: NodeGenerationInput[]) {
+    const byId = new Map(inputs.map((input) => [input.nodeId, input]));
+    return parseComposerTokens(value).reduce((length, token) => {
+        if (token.type === "text") return length + characterLength(token.value);
+        const input = byId.get(token.nodeId);
+        return length + (input ? characterLength(resourceLabel(input, inputs)) + 1 : 4);
+    }, 0);
+}
+
+function clampComposerValue(value: string, maxLength: number, inputs: NodeGenerationInput[]) {
+    const byId = new Map(inputs.map((input) => [input.nodeId, input]));
+    let remaining = maxLength;
+    let result = "";
+    for (const token of parseComposerTokens(value)) {
+        if (remaining <= 0) break;
+        if (token.type === "text") {
+            const text = sliceCharacters(token.value, remaining);
+            result += text;
+            remaining -= characterLength(text);
+            continue;
+        }
+        const input = byId.get(token.nodeId);
+        const referenceLength = input ? characterLength(resourceLabel(input, inputs)) + 1 : 4;
+        if (referenceLength > remaining) break;
+        result += `@[node:${token.nodeId}]`;
+        remaining -= referenceLength;
+    }
+    return result;
+}
+
+function characterLength(value: string) {
+    return Array.from(value).length;
+}
+
+function sliceCharacters(value: string, length: number) {
+    return Array.from(value).slice(0, length).join("");
+}
+
+function renderComposerValue(
+    editor: HTMLElement,
+    tokens: Token[],
+    referenceById: Map<string, NodeGenerationInput>,
+    inputs: NodeGenerationInput[],
+    theme: (typeof canvasThemes)[keyof typeof canvasThemes],
+    onImagePreview: (url: string) => void,
+) {
+    editor.textContent = "";
+    tokens.forEach((token) => {
+        if (token.type === "text") {
+            editor.append(document.createTextNode(token.value));
+            return;
+        }
+        const input = referenceById.get(token.nodeId);
+        if (input) editor.append(createReferenceChip(input, inputs, theme, onImagePreview));
+    });
 }
 
 function removeActiveMention() {

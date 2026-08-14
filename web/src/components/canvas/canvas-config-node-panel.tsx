@@ -115,7 +115,7 @@ export function CanvasConfigNodePanel({ node, isRunning, hostManagedGeneration =
                 <InputChip label="参考音频" value={`${inputSummary.audioCount} 个`} style={chipStyle} />
                 <button type="button" className="inline-flex h-7 cursor-pointer items-center gap-1 rounded-md border px-2 text-[11px]" style={chipStyle} onMouseDown={(event) => event.stopPropagation()} onClick={onComposerToggle}>
                     <Settings2 className="size-3.5" />
-                    组装提示词
+                    {hostManagedGeneration ? "编辑分镜描述" : "组装提示词"}
                 </button>
             </div>
 

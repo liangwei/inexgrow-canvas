@@ -2756,6 +2756,7 @@ function InfiniteCanvasPage({ embedded, lockTheme, hostManagedGeneration, extern
                 <CanvasConfigComposer
                     value={panelNode.metadata?.composerContent ?? panelNode.metadata?.prompt ?? ""}
                     inputs={configInputsById.get(panelNode.id) || []}
+                    hostManagedGeneration={hostManagedGeneration}
                     onChange={(composerContent) => handleConfigNodeChange(panelNode.id, { composerContent })}
                     onClose={() => setDialogNodeId(null)}
                 />
