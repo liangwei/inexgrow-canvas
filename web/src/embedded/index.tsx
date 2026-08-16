@@ -154,7 +154,7 @@ function EmbeddedCanvas({
             >
                 <App className="inexgrow-canvas-app">
                     <QueryClientProvider client={queryClient}>
-                        {ready ? (
+                        {ready && currentProject ? (
                             <MemoryRouter initialEntries={[`/canvas/${encodeURIComponent(project.id)}`]}>
                                 <Routes>
                                     <Route path="/canvas/:id" element={<CanvasPage embedded lockTheme={lockTheme} hostManagedGeneration={hostManagedGeneration} externalProjectRevision={canvasRevision} onGenerateNode={onGenerateNode} />} />
