@@ -71,6 +71,7 @@
 
 ## 发版本流程
 
+- 每次修改并发布 `@inexgrow/canvas` 嵌入包时，构建前必须递增根目录 `package.json` 的包版本；禁止让不同提交内容复用同一包版本，否则 Yarn 1 可能复用旧缓存并触发 integrity 校验失败。
 - 发版本时，先把 `CHANGELOG.md` 的 `Unreleased` 变更整理成新的版本记录，并保留空的 `Unreleased` 标题。
 - 按当前版本号提升一个版本，更新根目录 `VERSION`。
 - 将当前未提交的代码全部提交到 Git。
