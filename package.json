@@ -1,5 +1,5 @@
 {
-  "name": "@inexgrow/canvas",
+  "name": "@innexgrow/canvas",
   "version": "0.1.10",
   "description": "Embeddable infinite canvas for iNexGrow director workflows",
   "type": "module",
