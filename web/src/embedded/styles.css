@@ -182,6 +182,34 @@
     background: rgba(120, 113, 108, 0.5);
 }
 
+/* 画布弹层（挂在 body 的 antd Modal/Popover/Dropdown）统一中性滚动条 */
+.ant-modal-body,
+.ant-popover-inner-content,
+.ant-dropdown-menu {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(120, 113, 108, 0.45) transparent;
+}
+
+.ant-modal-body ::-webkit-scrollbar,
+.ant-popover-inner-content ::-webkit-scrollbar,
+.ant-dropdown-menu ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.ant-modal-body ::-webkit-scrollbar-thumb,
+.ant-popover-inner-content ::-webkit-scrollbar-thumb,
+.ant-dropdown-menu ::-webkit-scrollbar-thumb {
+    background: rgba(120, 113, 108, 0.45);
+    border-radius: 999px;
+}
+
+.ant-modal-body ::-webkit-scrollbar-track,
+.ant-popover-inner-content ::-webkit-scrollbar-track,
+.ant-dropdown-menu ::-webkit-scrollbar-track {
+    background: transparent;
+}
+
 .inexgrow-canvas-root textarea {
     resize: none;
 }
