@@ -182,6 +182,15 @@
     background: rgba(120, 113, 108, 0.5);
 }
 
+/* 宿主若使用 Tailwind 3，同名 translate 工具类与画布包 Tailwind 4 语义冲突，
+   画布根内统一按 transform 定位，避免浮层/工具条/锚点偏移。 */
+.inexgrow-canvas-root .-translate-x-1\/2 { transform: translateX(-50%); }
+.inexgrow-canvas-root .-translate-y-1\/2 { transform: translateY(-50%); }
+.inexgrow-canvas-root .-translate-x-full { transform: translateX(-100%); }
+.inexgrow-canvas-root .-translate-y-full { transform: translateY(-100%); }
+.inexgrow-canvas-root .translate-x-1\/2 { transform: translateX(50%); }
+.inexgrow-canvas-root .translate-y-1\/2 { transform: translateY(50%); }
+
 /* 画布弹层（挂在 body 的 antd Modal/Popover/Dropdown）统一中性滚动条 */
 .ant-modal-body,
 .ant-popover-inner-content,
