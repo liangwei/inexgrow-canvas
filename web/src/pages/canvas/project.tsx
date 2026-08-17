@@ -135,6 +135,10 @@ function isProtectedAcceptedSegment(node: CanvasNodeData | undefined | null): bo
     return Boolean(node && String(node.metadata?.seedanceWorkflowStatus || "") === "accepted");
 }
 
+function isProtectedDirectorSegment(node: CanvasNodeData | undefined | null): boolean {
+    return Boolean(node && String(node.metadata?.inexgrowKind || "") === "segment");
+}
+
 export type CanvasPageProps = {
     embedded?: boolean;
     lockTheme?: boolean;
@@ -754,13 +758,13 @@ function InfiniteCanvasPage({ embedded, lockTheme, hostManagedGeneration, extern
             });
             const protectedIds = new Set<string>();
             allIds.forEach((nodeId) => {
-                if (isProtectedAcceptedSegment(nodesRef.current.find((node) => node.id === nodeId))) {
+                if (isProtectedDirectorSegment(nodesRef.current.find((node) => node.id === nodeId))) {
                     protectedIds.add(nodeId);
                 }
             });
             protectedIds.forEach((nodeId) => allIds.delete(nodeId));
             if (protectedIds.size) {
-                message.warning("已验收分镜及其结果不可删除");
+                message.warning("分镜由导演策划管理，不可在画布中删除");
             }
             setNodes((prev) => {
                 const next = prev.filter((node) => !allIds.has(node.id));
