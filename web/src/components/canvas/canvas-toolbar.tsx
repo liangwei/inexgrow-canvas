@@ -105,11 +105,9 @@ export function CanvasToolbar({
                     <Redo2 className="size-4.5" />
                 </ToolbarButton>
                 <Divider theme={theme} />
-                {showCreateActions !== false ? (
-                    <ToolbarButton id="tool-text" label="文本" hovered={hovered} hoverStyle={hoverStyle} wrapRef={wrapRef} onTipX={setTipX} onHover={setHovered} onClick={onAddText}>
-                        <Type className="size-4.5" />
-                    </ToolbarButton>
-                ) : null}
+                <ToolbarButton id="tool-text" label="文本" hovered={hovered} hoverStyle={hoverStyle} wrapRef={wrapRef} onTipX={setTipX} onHover={setHovered} onClick={onAddText}>
+                    <Type className="size-4.5" />
+                </ToolbarButton>
                 {showCreateActions !== false ? (
                     <ToolbarButton id="tool-image" label="图片" hovered={hovered} hoverStyle={hoverStyle} wrapRef={wrapRef} onTipX={setTipX} onHover={setHovered} onClick={onAddImage}>
                         <ImageIcon className="size-4.5" />
@@ -135,7 +133,7 @@ export function CanvasToolbar({
                         <Group className="size-4.5" />
                     </ToolbarButton>
                 ) : null}
-                {showCreateActions !== false && extensionDefs.length ? (
+                {extensionDefs.length ? (
                     <ToolbarButton
                         id="tool-extensions"
                         label="扩展节点"

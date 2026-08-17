@@ -1,6 +1,6 @@
 {
   "name": "@inexgrow/canvas",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Embeddable infinite canvas for iNexGrow director workflows",
   "type": "module",
   "license": "AGPL-3.0-only",
