@@ -2970,8 +2970,8 @@ function InfiniteCanvasPage({ embedded, lockTheme, hostManagedGeneration, extern
                             }}
                         />
                     ) : null}
-                    {pendingConnectionCreate ? <ConnectionCreateMenu pending={pendingConnectionCreate} onCreate={(type) => createConnectedNode(type, pendingConnectionCreate)} onClose={cancelPendingConnectionCreate} /> : null}
-                    {nodeCreatePosition ? (
+                    {!hostManagedGeneration && pendingConnectionCreate ? <ConnectionCreateMenu pending={pendingConnectionCreate} onCreate={(type) => createConnectedNode(type, pendingConnectionCreate)} onClose={cancelPendingConnectionCreate} /> : null}
+                    {!hostManagedGeneration && nodeCreatePosition ? (
                         <NodeCreateMenu
                             position={nodeCreatePosition}
                             onCreate={(type) => {
@@ -3021,6 +3021,7 @@ function InfiniteCanvasPage({ embedded, lockTheme, hostManagedGeneration, extern
                     lockTheme={lockTheme}
                     showGenerationConfig={!hostManagedGeneration}
                     showUpload={!hostManagedGeneration}
+                    showCreateActions={!hostManagedGeneration}
                     onAddImage={() => createNode(CanvasNodeType.Image)}
                     onAddVideo={() => createNode(CanvasNodeType.Video)}
                     onAddAudio={() => createNode(CanvasNodeType.Audio)}
