@@ -160,7 +160,7 @@ export function CanvasToolbar({
                         <Upload className="size-4.5" />
                     </ToolbarButton>
                 ) : null}
-                <Divider theme={theme} />
+                {showCreateActions !== false ? <Divider theme={theme} /> : null}
                 <ToolbarButton
                     id="tool-style"
                     label="画布外观"
