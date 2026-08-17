@@ -27054,7 +27054,7 @@ function l8(e) {
 function c8({ nodes: e, selectedNodeIds: t, onFocusNode: n, onPreviewNode: r, theme: o }) {
   const { message: i } = Rr.useApp(), [a, s] = J(""), [l, u] = J("all"), [c, f] = J(!1), [h, p] = J(/* @__PURE__ */ new Set()), [b, g] = J(!1), v = Fe(() => {
     const E = new Set(e.map((N) => N.type));
-    return s8.filter((N) => E.has(N.value));
+    return s8.filter((N) => N.value === "all" || E.has(N.value));
   }, [e]);
   we(() => {
     l !== "all" && !v.some((E) => E.value === l) && u("all");

@@ -156,7 +156,7 @@ function CanvasNodesTab({ nodes, selectedNodeIds, onFocusNode, onPreviewNode, th
 
     const availableTypeOptions = useMemo(() => {
         const presentTypes = new Set(nodes.map((node) => node.type));
-        return NODE_FILTER_OPTIONS.filter((option) => presentTypes.has(option.value));
+        return NODE_FILTER_OPTIONS.filter((option) => option.value === "all" || presentTypes.has(option.value));
     }, [nodes]);
 
     useEffect(() => {
