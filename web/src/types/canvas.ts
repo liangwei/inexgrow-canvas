@@ -44,6 +44,8 @@ export type CanvasNodeMetadata = {
     vquality?: string;
     generateAudio?: string;
     watermark?: string;
+    /** 宿主导演流程注入的分镜工作流状态（locked/current/awaiting_review/accepted/revise）。 */
+    seedanceWorkflowStatus?: string;
     audioVoice?: string;
     audioFormat?: string;
     audioSpeed?: string;

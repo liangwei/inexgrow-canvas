@@ -23,6 +23,7 @@ export function CanvasToolbar({
     onAddConfig,
     onAddGroup,
     onAddExtensionNode,
+    showUpload = true,
     onUndo,
     onRedo,
     onUpload,
@@ -46,6 +47,7 @@ export function CanvasToolbar({
     onAddConfig: () => void;
     onAddGroup: () => void;
     onAddExtensionNode: (type: string) => void;
+    showUpload?: boolean;
     onUndo: () => void;
     onRedo: () => void;
     onUpload: () => void;
@@ -141,9 +143,11 @@ export function CanvasToolbar({
                         <Puzzle className="size-4.5" />
                     </ToolbarButton>
                 ) : null}
-                <ToolbarButton id="tool-upload" label="上传资产" hovered={hovered} hoverStyle={hoverStyle} wrapRef={wrapRef} onTipX={setTipX} onHover={setHovered} onClick={onUpload}>
-                    <Upload className="size-4.5" />
-                </ToolbarButton>
+                {showUpload !== false ? (
+                    <ToolbarButton id="tool-upload" label="上传资产" hovered={hovered} hoverStyle={hoverStyle} wrapRef={wrapRef} onTipX={setTipX} onHover={setHovered} onClick={onUpload}>
+                        <Upload className="size-4.5" />
+                    </ToolbarButton>
+                ) : null}
                 <Divider theme={theme} />
                 <ToolbarButton
                     id="tool-style"

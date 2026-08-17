@@ -131,6 +131,10 @@ const IMAGE_PROMPT_REVERSE_PRESET = `请根据参考图片反推一段适合用�
 2. 覆盖主体、构图、风格、光线、色彩、材质、镜头和氛围。
 3. 尽量写成可直接用于生图模型的完整提示词。`;
 
+function isProtectedAcceptedSegment(node: CanvasNodeData | undefined | null): boolean {
+    return Boolean(node && String(node.metadata?.seedanceWorkflowStatus || "") === "accepted");
+}
+
 export type CanvasPageProps = {
     embedded?: boolean;
     lockTheme?: boolean;
@@ -511,6 +515,13 @@ function InfiniteCanvasPage({ embedded, lockTheme, hostManagedGeneration, extern
                 return;
             }
             const { fromNodeId, toNodeId } = connection;
+            const protectedEndpoint = [fromNodeId, toNodeId].find((nodeId) =>
+                isProtectedAcceptedSegment(nodesRef.current.find((node) => node.id === nodeId)),
+            );
+            if (protectedEndpoint) {
+                message.warning("已验收分镜不可连入或改动素材引用");
+                return;
+            }
             const exists = connectionsRef.current.some((conn) => conn.fromNodeId === fromNodeId && conn.toNodeId === toNodeId);
             if (!exists) {
                 setConnections((prev) => [...prev, { id: `conn-${Date.now()}`, fromNodeId, toNodeId }]);
@@ -741,6 +752,16 @@ function InfiniteCanvasPage({ embedded, lockTheme, hostManagedGeneration, extern
             nodesRef.current.forEach((node) => {
                 if (ids.has(node.id)) node.metadata?.batchChildIds?.forEach((childId) => allIds.add(childId));
             });
+            const protectedIds = new Set<string>();
+            allIds.forEach((nodeId) => {
+                if (isProtectedAcceptedSegment(nodesRef.current.find((node) => node.id === nodeId))) {
+                    protectedIds.add(nodeId);
+                }
+            });
+            protectedIds.forEach((nodeId) => allIds.delete(nodeId));
+            if (protectedIds.size) {
+                message.warning("已验收分镜及其结果不可删除");
+            }
             setNodes((prev) => {
                 const next = prev.filter((node) => !allIds.has(node.id));
                 return next.map((node) => {
@@ -779,14 +800,24 @@ function InfiniteCanvasPage({ embedded, lockTheme, hostManagedGeneration, extern
             setContextMenu((current) => (current?.type === "node" && allIds.has(current.nodeId) ? null : current));
             cleanupCanvasFiles({ projectId, nodes: nodesRef.current.filter((node) => !allIds.has(node.id)), chatSessions });
         },
-        [chatSessions, cleanupCanvasFiles, projectId],
+        [chatSessions, cleanupCanvasFiles, message, projectId],
     );
 
     const deleteConnection = useCallback((connectionId: string) => {
+        const target = connectionsRef.current.find((connection) => connection.id === connectionId);
+        if (target) {
+            const protectedEndpoint = [target.fromNodeId, target.toNodeId].find((nodeId) =>
+                isProtectedAcceptedSegment(nodesRef.current.find((node) => node.id === nodeId)),
+            );
+            if (protectedEndpoint) {
+                message.warning("已验收分镜的素材引用不可断开");
+                return;
+            }
+        }
         setConnections((prev) => prev.filter((conn) => conn.id !== connectionId));
         setSelectedConnectionId((current) => (current === connectionId ? null : current));
         setContextMenu((current) => (current?.type === "connection" && current.connectionId === connectionId ? null : current));
-    }, []);
+    }, [message]);
 
     const deselectCanvas = useCallback(() => {
         cancelPendingConnectionCreate();
@@ -2955,6 +2986,7 @@ function InfiniteCanvasPage({ embedded, lockTheme, hostManagedGeneration, extern
                 <CanvasNodeHoverToolbar
                     node={isNodeDragging || isNodeResizing || nodeImageSettingsOpen ? null : toolbarNode}
                     viewport={viewport}
+                    hostManagedGeneration={hostManagedGeneration}
                     extraTools={toolbarNode ? buildNodeToolbarItems(toolbarNode) : undefined}
                     onKeep={keepNodeToolbar}
                     onLeave={hideNodeToolbar}
@@ -2988,6 +3020,7 @@ function InfiniteCanvasPage({ embedded, lockTheme, hostManagedGeneration, extern
                     showImageInfo={showImageInfo}
                     lockTheme={lockTheme}
                     showGenerationConfig={!hostManagedGeneration}
+                    showUpload={!hostManagedGeneration}
                     onAddImage={() => createNode(CanvasNodeType.Image)}
                     onAddVideo={() => createNode(CanvasNodeType.Video)}
                     onAddAudio={() => createNode(CanvasNodeType.Audio)}
